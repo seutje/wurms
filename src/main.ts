@@ -66,8 +66,8 @@ function startGame() {
   let currentGameState = GameState.PLANNING;
 
   // Wurms
-  const playerWurm = new Wurm(100, 100, 100, 'blue');
-  const aiWurm = new Wurm(canvas.width - 100, 100, 100, 'green');
+  const playerWurm = new Wurm(100, terrain.getGroundHeight(100), 100, 'blue');
+  const aiWurm = new Wurm(canvas.width - 100, terrain.getGroundHeight(canvas.width - 100), 100, 'green');
 
   // AI Model
   let aiModel: DQNModel | null = null;
@@ -262,8 +262,8 @@ function startGame() {
         context.fillRect(x, y, 1, canvas.height - y);
       }
 
-      playerWurm.render();
-      aiWurm.render();
+      playerWurm.draw();
+      aiWurm.draw();
       for (const projectile of projectiles) {
         projectile.render();
       }
@@ -288,9 +288,9 @@ aiDemoCanvasContainer.appendChild(aiDemoCanvas);
 
 init(aiDemoCanvas);
 
-const aiDemoTerrain = new Terrain(aiDemoCanvas.width, aiDemoCanvas.height);
-const aiDemoWurm1 = new Wurm(50, 50, 100, 'red');
-const aiDemoWurm2 = new Wurm(aiDemoCanvas.width - 50, 50, 100, 'yellow');
+const aiDemoTerrain = new Terrain(aiDemoCanvas.width, aiDemoCanvas.height, aiDemoCanvas.getContext('2d')!);
+const aiDemoWurm1 = new Wurm(50, aiDemoTerrain.getGroundHeight(50), 100, 'red');
+const aiDemoWurm2 = new Wurm(aiDemoCanvas.width - 50, aiDemoTerrain.getGroundHeight(aiDemoCanvas.width - 50), 100, 'yellow');
 const aiDemoProjectiles: Projectile[] = [];
 
 const aiDemoLoop = GameLoop({
@@ -358,8 +358,8 @@ const aiDemoLoop = GameLoop({
       aiDemoCanvas.getContext('2d')!.fillRect(x, y, 1, aiDemoCanvas.height - y);
     }
 
-    aiDemoWurm1.render();
-    aiDemoWurm2.render();
+    aiDemoWurm1.draw();
+    aiDemoWurm2.draw();
     for (const projectile of aiDemoProjectiles) {
       projectile.render();
     }
