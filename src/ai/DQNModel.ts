@@ -21,8 +21,7 @@ export class DQNModel {
     return model;
   }
 
-  public predict(observation: Observation): tf.Tensor<tf.Rank> {
-    // Flatten the observation into a single array for the neural network input
+  private encode(observation: Observation): tf.Tensor2D {
     const flatObservation = [
       observation.playerWurmX,
       observation.playerWurmY,
@@ -32,12 +31,16 @@ export class DQNModel {
       observation.aiWurmHealth,
       ...observation.terrainHeights,
     ];
-    const inputTensor = tf.tensor2d([flatObservation], [1, this.inputShape[0]]);
-    return this.model.predict(inputTensor) as tf.Tensor<tf.Rank>;
+    return tf.tensor2d([flatObservation], [1, this.inputShape[0]]);
   }
 
-  public train(input: tf.Tensor<tf.Rank>, target: tf.Tensor<tf.Rank>) {
-    return this.model.fit(input, target);
+  public predict(observation: Observation): tf.Tensor<tf.Rank> {
+    return this.model.predict(this.encode(observation)) as tf.Tensor<tf.Rank>;
+  }
+
+  public train(observation: Observation, target: tf.Tensor<tf.Rank>) {
+    const inputTensor = this.encode(observation);
+    return this.model.fit(inputTensor, target);
   }
 
   public save(path: string) {
