@@ -20,4 +20,14 @@ export class Wurm extends Sprite {
       this.health = 0;
     }
   }
+
+  public collidesWith(projectile: any): boolean {
+    // Simple bounding box collision detection
+    return (
+      this.x < projectile.x + projectile.width &&
+      this.x + this.width > projectile.x &&
+      this.y < projectile.y + projectile.height &&
+      this.y + this.height > projectile.y
+    );
+  }
 }
