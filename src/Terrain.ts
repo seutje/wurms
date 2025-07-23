@@ -1,51 +1,58 @@
-import p5 from 'p5';
+import { GameObject } from 'kontra';
 
-export class Terrain {
-  private terrain: p5.Image;
-  private p: p5;
+export class Terrain extends GameObject {
+  private terrainCanvas: HTMLCanvasElement;
+  private terrainContext: CanvasRenderingContext2D;
 
-  constructor(p: p5) {
-    this.p = p;
-    this.terrain = this.generateTerrain();
+  constructor(width: number, height: number) {
+    super({ width, height });
+    this.terrainCanvas = document.createElement('canvas');
+    this.terrainCanvas.width = width;
+    this.terrainCanvas.height = height;
+    this.terrainContext = this.terrainCanvas.getContext('2d')!;
+    this.generateTerrain();
   }
 
-  private generateTerrain(): p5.Image {
-    const terrainImage = this.p.createImage(this.p.width, this.p.height);
-    terrainImage.loadPixels();
-
+  private generateTerrain() {
     const noiseScale = 0.01;
-
-    for (let x = 0; x < terrainImage.width; x++) {
-      const noiseVal = this.p.noise(x * noiseScale);
-      const y = this.p.map(noiseVal, 0, 1, this.p.height / 2, this.p.height);
-
-      for (let j = y; j < this.p.height; j++) {
-        terrainImage.set(x, j, this.p.color(139, 69, 19));
+    const perlin = (x: number) => {
+      // Simple Perlin noise implementation
+      let n = 0;
+      let a = 1;
+      let f = 0.05;
+      for (let o = 0; o < 4; o++) {
+        n += Math.sin(x * f) * a;
+        a *= 0.5;
+        f *= 2;
       }
-    }
+      return n;
+    };
 
-    terrainImage.updatePixels();
-    return terrainImage;
+    this.terrainContext.fillStyle = '#8B4513';
+    for (let x = 0; x < this.width; x++) {
+      const noiseVal = perlin(x * noiseScale);
+      const y = (noiseVal * (this.height / 4)) + (this.height / 2);
+      this.terrainContext.fillRect(x, y, 1, this.height - y);
+    }
   }
 
   public draw() {
-    this.p.image(this.terrain, 0, 0);
+    this.context.drawImage(this.terrainCanvas, 0, 0);
   }
 
   public destroy(x: number, y: number, radius: number) {
-    this.terrain.loadPixels();
-    for (let i = x - radius; i < x + radius; i++) {
-      for (let j = y - radius; j < y + radius; j++) {
-        if (this.p.dist(i, j, x, y) < radius) {
-          this.terrain.set(i, j, this.p.color(0, 0, 0, 0));
-        }
-      }
-    }
-    this.terrain.updatePixels();
+    this.terrainContext.globalCompositeOperation = 'destination-out';
+    this.terrainContext.beginPath();
+    this.terrainContext.arc(x, y, radius, 0, Math.PI * 2);
+    this.terrainContext.fill();
+    this.terrainContext.globalCompositeOperation = 'source-over';
   }
 
-  public isColliding(pos: p5.Vector): boolean {
-    const c = this.terrain.get(pos.x, pos.y);
-    return this.p.alpha(c) !== 0;
+  public isColliding(x: number, y: number): boolean {
+    if (x < 0 || x >= this.width || y < 0 || y >= this.height) {
+      return false;
+    }
+    const pixel = this.terrainContext.getImageData(x, y, 1, 1).data;
+    return pixel[3] > 0;
   }
 }

@@ -1,40 +1,41 @@
-import p5 from 'p5';
+import { init, GameLoop, initPointer, onPointer } from 'kontra';
 import { Terrain } from './Terrain';
 import { Projectile } from './Projectile';
 
-const sketch = (p: p5) => {
-  let terrain: Terrain;
-  const projectiles: Projectile[] = [];
+const { canvas } = init('game');
+initPointer();
 
-  p.setup = () => {
-    p.createCanvas(p.windowWidth, p.windowHeight);
-    terrain = new Terrain(p);
-  };
+const terrain = new Terrain(canvas.width, canvas.height);
+const projectiles: Projectile[] = [];
 
-  p.draw = () => {
-    p.background(0);
-    terrain.draw();
+onPointer('down', (e, object) => {
+  const projectile = new Projectile(
+    e.x,
+    e.y,
+    (Math.random() * 10) - 5,
+    (Math.random() * -5) - 5
+  );
+  projectiles.push(projectile);
+});
 
+const loop = GameLoop({
+  update: () => {
     for (let i = projectiles.length - 1; i >= 0; i--) {
       const projectile = projectiles[i];
       projectile.update();
-      projectile.draw();
 
-      if (terrain.isColliding(projectile.getPosition())) {
-        terrain.destroy(projectile.getPosition().x, projectile.getPosition().y, 50);
+      if (terrain.isColliding(projectile.x, projectile.y)) {
+        terrain.destroy(projectile.x, projectile.y, 50);
         projectiles.splice(i, 1);
       }
     }
-  };
+  },
+  render: () => {
+    terrain.render();
+    for (const projectile of projectiles) {
+      projectile.render();
+    }
+  }
+});
 
-  p.mousePressed = () => {
-    const projectile = new Projectile(
-      p,
-      p.createVector(p.mouseX, p.mouseY),
-      p.createVector(p.random(-5, 5), p.random(-5, -10))
-    );
-    projectiles.push(projectile);
-  };
-};
-
-new p5(sketch);
+loop.start();
