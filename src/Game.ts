@@ -64,6 +64,13 @@ export class Game {
     for (let i = this.projectiles.length - 1; i >= 0; i--) {
       const projectile = this.projectiles[i];
       projectile.update();
+      if (projectile.x < 0) {
+        projectile.x = 0;
+        projectile.dx = -projectile.dx;
+      } else if (projectile.x + projectile.radius * 2 > this.canvas.width) {
+        projectile.x = this.canvas.width - projectile.radius * 2;
+        projectile.dx = -projectile.dx;
+      }
       if (handleProjectileWurmCollision(projectile, this.playerWurm, this.terrain)) {
         console.log('Player hit!');
         this.projectiles.splice(i, 1);
