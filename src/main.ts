@@ -64,7 +64,7 @@ function startGame() {
 
   async function loadModel() {
     try {
-      aiModel = await DQNModel.load('/src/models/dqn-model');
+      aiModel = await DQNModel.load('/models/dqn-model/model.json');
       console.log('AI Model loaded successfully.');
     } catch (error) {
       console.warn('Could not load AI model, using random AI.', error);

@@ -100,8 +100,8 @@ async function train() {
     console.log(`Episode ${episode + 1}: Total Reward = ${totalReward}, Epsilon = ${epsilon.toFixed(2)}`);
   }
 
-  // Save the trained model
-  await dqnModel.save('file://./src/models/dqn-model');
+  // Save the trained model to the public directory so it can be served
+  await dqnModel.save('file://./public/models/dqn-model');
   console.log('Model trained and saved.');
 }
 
