@@ -68,7 +68,6 @@ canvas {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  background-color: black;
   color: white;
   font-family: 'Press Start 2P', cursive; /* Example retro font */
   text-align: center;

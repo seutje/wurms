@@ -146,8 +146,8 @@ function startGame() {
             projectile.update();
 
             // Check collision with terrain
-            if (terrain.isColliding(projectile.x, projectile.y)) {
-              terrain.destroy(projectile.x, projectile.y, projectile.radius);
+            if (terrain.isColliding(projectile.x + projectile.radius, projectile.y + projectile.radius)) {
+              terrain.destroy(projectile.x + projectile.radius, projectile.y + projectile.radius, projectile.radius);
               projectiles.splice(i, 1);
               // Remove from currentTurnProjectiles if it was one of them
               const indexInCurrentTurn = currentTurnProjectiles.indexOf(projectile);
@@ -165,7 +165,8 @@ function startGame() {
                 aiWurm.takeDamage(projectile.damage);
                 soundManager.playSound('damage');
               }
-            } else if (projectile.x < 0 || projectile.x > canvas.width || projectile.y > canvas.height) {
+            } else if (projectile.x + (projectile.radius * 2) < 0 || projectile.x > canvas.width || projectile.y + (projectile.radius * 2) < 0 || projectile.y > canvas.height) {
+              console.log(`Projectile removed: Off-screen at x: ${projectile.x}, y: ${projectile.y}, radius: ${projectile.radius}`);
               // Remove projectiles that go off-screen
               projectiles.splice(i, 1);
               // Remove from currentTurnProjectiles if it was one of them
@@ -254,26 +255,7 @@ function startGame() {
       }
     },
     render: () => {
-      // Draw terrain directly
-      const noiseScale = 0.01;
-      const perlin = (x: number) => {
-        let n = 0;
-        let a = 1;
-        let f = 0.05;
-        for (let o = 0; o < 4; o++) {
-          n += Math.sin(x * f) * a;
-          a *= 0.5;
-          f *= 2;
-        }
-        return n;
-      };
-
-      context.fillStyle = '#8B4513';
-      for (let x = 0; x < canvas.width; x++) {
-        const noiseVal = perlin(x * noiseScale);
-        const y = (noiseVal * (canvas.height / 4)) + (canvas.height / 2);
-        context.fillRect(x, y, 1, canvas.height - y);
-      }
+      terrain.draw();
 
       playerWurm.draw();
       aiWurm.draw();
@@ -340,36 +322,18 @@ const aiDemoLoop = GameLoop({
       const projectile = aiDemoProjectiles[i];
       projectile.update();
 
-      if (aiDemoTerrain.isColliding(projectile.x, projectile.y)) {
-        aiDemoTerrain.destroy(projectile.x, projectile.y, projectile.radius);
+      if (aiDemoTerrain.isColliding(projectile.x + projectile.radius, projectile.y + projectile.radius)) {
+        console.log(`AI Demo Projectile removed: Terrain collision at x: ${projectile.x}, y: ${projectile.y}, radius: ${projectile.radius}`);
+        aiDemoTerrain.destroy(projectile.x + projectile.radius, projectile.y + projectile.radius, projectile.radius);
         aiDemoProjectiles.splice(i, 1);
         soundManager.playSound('explosion');
-      } else if (projectile.x < 0 || projectile.x > aiDemoCanvas.width || projectile.y > aiDemoCanvas.height) {
+      } else if (projectile.x + (projectile.radius * 2) < 0 || projectile.x > aiDemoCanvas.width || projectile.y + (projectile.radius * 2) < 0 || projectile.y > aiDemoCanvas.height) {
         aiDemoProjectiles.splice(i, 1);
       }
     }
   },
   render: () => {
-    // Draw AI demo terrain directly
-    const noiseScale = 0.01;
-    const perlin = (x: number) => {
-      let n = 0;
-      let a = 1;
-      let f = 0.05;
-      for (let o = 0; o < 4; o++) {
-        n += Math.sin(x * f) * a;
-        a *= 0.5;
-        f *= 2;
-      }
-      return n;
-    };
-
-    aiDemoCanvas.getContext('2d')!.fillStyle = '#8B4513';
-    for (let x = 0; x < aiDemoCanvas.width; x++) {
-      const noiseVal = perlin(x * noiseScale);
-      const y = (noiseVal * (aiDemoCanvas.height / 4)) + (aiDemoCanvas.height / 2);
-      aiDemoCanvas.getContext('2d')!.fillRect(x, y, 1, aiDemoCanvas.height - y);
-    }
+    aiDemoTerrain.draw();
 
     aiDemoWurm1.draw();
     aiDemoWurm2.draw();

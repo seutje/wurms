@@ -3,43 +3,55 @@ import kontra from 'kontra/kontra.mjs';
 const { GameObject } = kontra;
 
 export class Terrain extends GameObject {
-  
+  private terrainCanvas: HTMLCanvasElement;
+  private terrainContext: CanvasRenderingContext2D;
 
   constructor(width: number, height: number, context: CanvasRenderingContext2D) {
-    super({ width, height, context });
+    super({ width, height, context }); // 'context' here is the main canvas context
+
+    this.terrainCanvas = document.createElement('canvas');
+    this.terrainCanvas.width = width;
+    this.terrainCanvas.height = height;
+    this.terrainContext = this.terrainCanvas.getContext('2d')!;
+
+    // Draw initial terrain onto the offscreen canvas
+    this.drawInitialTerrain();
   }
 
-  
+  private drawInitialTerrain = () => {
+    
+
+    this.terrainContext.fillStyle = 'green';
+    this.terrainContext.beginPath();
+    this.terrainContext.moveTo(0, this.getGroundHeight(0));
+    for (let x = 0; x < this.width; x++) {
+      this.terrainContext.lineTo(x, this.getGroundHeight(x));
+    }
+    this.terrainContext.lineTo(this.width, this.height);
+    this.terrainContext.lineTo(0, this.height);
+    this.terrainContext.closePath();
+    this.terrainContext.fill();
+  };
 
   public draw = () => {
-    this.context.fillStyle = 'brown';
-    this.context.fillRect(0, 0, this.width, this.height);
-
-    this.context.fillStyle = 'green';
-    this.context.beginPath();
-    this.context.moveTo(0, this.getGroundHeight(0));
-    for (let x = 0; x < this.width; x++) {
-      this.context.lineTo(x, this.getGroundHeight(x));
-    }
-    this.context.lineTo(this.width, this.height);
-    this.context.lineTo(0, this.height);
-    this.context.closePath();
-    this.context.fill();
+    // Draw the offscreen canvas onto the main canvas
+    this.context.drawImage(this.terrainCanvas, 0, 0);
   };
 
   public destroy = (x: number, y: number, radius: number) => {
-    this.context.globalCompositeOperation = 'destination-out';
-    this.context.beginPath();
-    this.context.arc(x, y, radius, 0, Math.PI * 2);
-    this.context.fill();
-    this.context.globalCompositeOperation = 'source-over';
+    this.terrainContext.globalCompositeOperation = 'destination-out';
+    this.terrainContext.beginPath();
+    this.terrainContext.arc(x, y, radius, 0, Math.PI * 2);
+    this.terrainContext.fill();
+    this.terrainContext.globalCompositeOperation = 'source-over';
   };
 
   public isColliding = (x: number, y: number): boolean => {
     if (x < 0 || x >= this.width || y < 0 || y >= this.height) {
       return false;
     }
-    const pixel = this.context.getImageData(x, y, 1, 1).data;
+    // Check collision against the offscreen canvas
+    const pixel = this.terrainContext.getImageData(x, y, 1, 1).data;
     return pixel[3] > 0;
   };
 
