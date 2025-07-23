@@ -39,8 +39,9 @@ export class Game {
   public fire(wurm: Wurm, weapon: string, angle: number, power: number) {
     const { radius, damage, explosionRadius } = weaponProperties[weapon];
     const radians = angle * Math.PI / 180;
-    const startX = wurm.x + wurm.width / 2 + Math.cos(radians) * radius - radius;
-    const startY = wurm.y + wurm.height / 2 - Math.sin(radians) * radius - radius;
+    const offset = wurm.width / 2 + radius + 0.1;
+    const startX = wurm.x + wurm.width / 2 + Math.cos(radians) * offset - radius;
+    const startY = wurm.y + wurm.height / 2 - Math.sin(radians) * offset - radius;
     const velX = power * Math.cos(radians) * 0.15;
     const velY = power * Math.sin(radians) * -0.15;
 
