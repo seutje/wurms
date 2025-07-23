@@ -1,13 +1,13 @@
 // Import kontra from its ESM build for compatibility with both browser and Node
 import kontra from 'kontra/kontra.mjs';
 const { init, GameLoop } = kontra;
-import { Terrain } from './Terrain.js';
-import { Projectile } from './Projectile.js';
-import { Wurm } from './Wurm.js';
-import { DQNModel } from './ai/DQNModel.js';
-import { getObservation } from './ai/ObservationSpace.js';
-import { WEAPON_CHOICES } from './ai/ActionSpace.js';
-import { SoundManager } from './SoundManager.js';
+import { Terrain } from './Terrain.ts';
+import { Projectile } from './Projectile.ts';
+import { Wurm } from './Wurm.ts';
+import { DQNModel } from './ai/DQNModel.ts';
+import { getObservation } from './ai/ObservationSpace.ts';
+import { WEAPON_CHOICES } from './ai/ActionSpace.ts';
+import { SoundManager } from './SoundManager.ts';
 
 // Sound Manager
 const soundManager = new SoundManager();
