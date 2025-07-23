@@ -8,6 +8,25 @@
   </head>
   <body>
     <canvas id="game"></canvas>
+    <div id="controls">
+      <label for="weapon">Weapon:</label>
+      <select id="weapon">
+        <option value="bazooka">Bazooka</option>
+        <option value="grenade">Grenade</option>
+        <option value="mortar">Mortar</option>
+        <option value="nuke">Nuke</option>
+      </select>
+
+      <label for="angle">Angle:</label>
+      <input type="range" id="angle" min="0" max="180" value="45">
+      <span id="angle-value">45</span>
+
+      <label for="power">Power:</label>
+      <input type="range" id="power" min="0" max="100" value="50">
+      <span id="power-value">50</span>
+
+      <button id="fire">Fire!</button>
+    </div>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

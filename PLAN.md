@@ -131,11 +131,11 @@ The reward function is crucial for training. It will guide the AI's learning pro
 *   [x] Implement the physics for projectile motion.
 
 ### Milestone 2: Core Gameplay (1 week)
-*   [ ] Implement player controls for weapon, angle, and power.
-*   [ ] Implement the turn-based structure (planning, execution, resolution).
-*   [ ] Add wurm entities with health.
-*   [ ] Implement damage calculation and win/loss conditions.
-*   [ ] Add multiple weapon types.
+*   [x] Implement player controls for weapon, angle, and power.
+*   [x] Implement the turn-based structure (planning, execution, resolution).
+*   [x] Add wurm entities with health.
+*   [x] Implement damage calculation and win/loss conditions.
+*   [x] Add multiple weapon types.
 
 ### Milestone 3: AI Implementation (2-3 weeks)
 *   [ ] Create a simple "random" AI that chooses actions randomly.
