@@ -10,10 +10,7 @@ export class Terrain extends GameObject {
     this.terrainCanvas.width = width;
     this.terrainCanvas.height = height;
     this.terrainContext = this.terrainCanvas.getContext('2d')!;
-    this.generateTerrain();
-  }
 
-  private generateTerrain() {
     const noiseScale = 0.01;
     const perlin = (x: number) => {
       // Simple Perlin noise implementation
