@@ -194,20 +194,33 @@ function startGame() {
   mainGameLoop.start();
 }
 
-// AI vs AI Demo Loop
-const aiDemoCanvasContainer = document.getElementById('ai-demo-canvas-container') as HTMLElement;
-const aiDemoCanvas = document.createElement('canvas');
+// AI vs AI Demo Loop on the main canvas
+const aiDemoCanvas = document.getElementById('game') as HTMLCanvasElement;
 aiDemoCanvas.width = 800;
 aiDemoCanvas.height = 600;
-aiDemoCanvasContainer.appendChild(aiDemoCanvas);
+
+const aiDemoContext = aiDemoCanvas.getContext('2d') as CanvasRenderingContext2D;
 
 init(aiDemoCanvas);
 
-const aiDemoTerrain = new Terrain(aiDemoCanvas.width, aiDemoCanvas.height, aiDemoCanvas.getContext('2d')!);
-const aiDemoWurm1 = new Wurm(50, aiDemoTerrain.getGroundHeight(50), 100, 'red');
-const aiDemoWurm2 = new Wurm(aiDemoCanvas.width - 50, aiDemoTerrain.getGroundHeight(aiDemoCanvas.width - 50), 100, 'yellow');
-const aiDemoProjectiles: Projectile[] = [];
+let aiDemoTerrain: Terrain;
+let aiDemoWurm1: Wurm;
+let aiDemoWurm2: Wurm;
+let aiDemoProjectiles: Projectile[] = [];
 let aiDemoTurn: 'wurm1' | 'wurm2' = 'wurm1';
+
+function initAiDemo() {
+  aiDemoTerrain = new Terrain(aiDemoCanvas.width, aiDemoCanvas.height, aiDemoContext);
+  aiDemoWurm1 = new Wurm(50, aiDemoTerrain.getGroundHeight(50), 100, 'red');
+  aiDemoWurm2 = new Wurm(
+    aiDemoCanvas.width - 50,
+    aiDemoTerrain.getGroundHeight(aiDemoCanvas.width - 50),
+    100,
+    'yellow'
+  );
+  aiDemoProjectiles = [];
+  aiDemoTurn = 'wurm1';
+}
 
 const aiDemoLoop = GameLoop({
   update: () => {
@@ -275,6 +288,7 @@ startGameButton.addEventListener('click', () => {
   startScreen.style.display = 'none';
   gameScreen.style.display = 'block';
   aiDemoLoop.stop(); // Stop AI demo when game starts
+  aiDemoContext.clearRect(0, 0, aiDemoCanvas.width, aiDemoCanvas.height);
   startGame(); // Start main game loop
 });
 
@@ -282,9 +296,11 @@ startGameButton.addEventListener('click', () => {
 playAgainButton.addEventListener('click', () => {
   gameOverScreen.style.display = 'none';
   startScreen.style.display = 'flex';
+  initAiDemo();
   aiDemoLoop.start(); // Restart AI demo
 });
 
+initAiDemo();
 aiDemoLoop.start(); // Start AI demo loop initially
 
 
