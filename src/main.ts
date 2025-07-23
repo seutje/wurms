@@ -121,7 +121,8 @@ function startGame() {
         velX,
         velY,
         radius,
-        damage
+        damage,
+        explosionRadius
       );
       projectiles.push(projectile);
       currentTurnProjectiles.push(projectile);
@@ -147,7 +148,7 @@ function startGame() {
 
             // Check collision with terrain
             if (terrain.isColliding(projectile.x + projectile.radius, projectile.y + projectile.radius)) {
-              terrain.destroy(projectile.x + projectile.radius, projectile.y + projectile.radius, projectile.radius);
+              terrain.destroy(projectile.x + projectile.radius, projectile.y + projectile.radius, projectile.explosionRadius);
               projectiles.splice(i, 1);
               // Remove from currentTurnProjectiles if it was one of them
               const indexInCurrentTurn = currentTurnProjectiles.indexOf(projectile);
@@ -223,7 +224,7 @@ function startGame() {
             aiWeapon = aiWeaponOptions[Math.floor(Math.random() * aiWeaponOptions.length)];
           }
 
-          const { radius: aiRadius, damage: aiDamage } = weaponProperties[aiWeapon];
+          const { radius: aiRadius, damage: aiDamage, explosionRadius: aiExplosionRadius } = weaponProperties[aiWeapon];
 
           const aiStartX = aiWurm.x;
           const aiStartY = aiWurm.y - 10; // Spawn slightly above the wurm
@@ -238,7 +239,8 @@ function startGame() {
             aiVelX,
             aiVelY,
             aiRadius,
-            aiDamage
+            aiDamage,
+            aiExplosionRadius
           );
           projectiles.push(aiProjectile);
           currentTurnProjectiles.push(aiProjectile);
@@ -297,7 +299,7 @@ const aiDemoLoop = GameLoop({
       const aiWeaponOptions = Object.keys(weaponProperties);
       const aiWeapon = aiWeaponOptions[Math.floor(Math.random() * aiWeaponOptions.length)];
 
-      const { radius, damage } = weaponProperties[aiWeapon];
+      const { radius, damage, explosionRadius } = weaponProperties[aiWeapon];
 
       const startX = aiDemoWurm1.x;
       const startY = aiDemoWurm1.y;
@@ -312,7 +314,8 @@ const aiDemoLoop = GameLoop({
         velX,
         velY,
         radius,
-        damage
+        damage,
+        explosionRadius
       );
       aiDemoProjectiles.push(projectile);
       soundManager.playSound('fire');
@@ -324,7 +327,7 @@ const aiDemoLoop = GameLoop({
 
       if (aiDemoTerrain.isColliding(projectile.x + projectile.radius, projectile.y + projectile.radius)) {
         console.log(`AI Demo Projectile removed: Terrain collision at x: ${projectile.x}, y: ${projectile.y}, radius: ${projectile.radius}`);
-        aiDemoTerrain.destroy(projectile.x + projectile.radius, projectile.y + projectile.radius, projectile.radius);
+        aiDemoTerrain.destroy(projectile.x + projectile.radius, projectile.y + projectile.radius, projectile.explosionRadius);
         aiDemoProjectiles.splice(i, 1);
         soundManager.playSound('explosion');
       } else if (projectile.x + (projectile.radius * 2) < 0 || projectile.x > aiDemoCanvas.width || projectile.y + (projectile.radius * 2) < 0 || projectile.y > aiDemoCanvas.height) {
