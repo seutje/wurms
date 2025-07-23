@@ -2,14 +2,14 @@ import { JSDOM } from 'jsdom';
 import * as tf from '@tensorflow/tfjs-core';
 import '@tensorflow/tfjs-node'; // Use tfjs-node for headless environment
 
-import { init } from './kontra.mock.js';
-import { Terrain } from './Terrain.js';
-import { Projectile } from './Projectile.js';
-import { Wurm } from './Wurm.js';
-import { DQNModel } from './ai/DQNModel.js';
-import { getObservation } from './ai/ObservationSpace.js';
-import { WEAPON_CHOICES } from './ai/ActionSpace.js';
-import { calculateReward } from './ai/RewardFunction.js';
+import { init } from './kontra.mock.ts';
+import { Terrain } from './Terrain.ts';
+import { Projectile } from './Projectile.ts';
+import { Wurm } from './Wurm.ts';
+import { DQNModel } from './ai/DQNModel.ts';
+import { getObservation } from './ai/ObservationSpace.ts';
+import { WEAPON_CHOICES } from './ai/ActionSpace.ts';
+import { calculateReward } from './ai/RewardFunction.ts';
 
 // Setup JSDOM for Kontra.js headless environment
 const dom = new JSDOM(`<!DOCTYPE html><body><canvas id="game"></canvas></body>`);
