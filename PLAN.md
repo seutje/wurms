@@ -153,7 +153,7 @@ The reward function is crucial for training. It will guide the AI's learning pro
 *   [x] Refine UI elements and overall presentation.
 
 ### Milestone 5: Testing and Deployment (1 week)
-*   [ ] Thoroughly test the game for bugs.
-*   [ ] Balance weapons and gameplay.
-*   [ ] Refine the AI model through more training.
-*   [ ] Prepare for deployment (e.g., to GitHub Pages).
+*   [x] Thoroughly test the game for bugs.
+*   [x] Balance weapons and gameplay.
+*   [x] Refine the AI model through more training.
+*   [x] Prepare for deployment (e.g., to GitHub Pages).

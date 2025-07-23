@@ -1,5 +1,4 @@
-import * as tf from '@tensorflow/tfjs-core';
-import '@tensorflow/tfjs-layers';
+import * as tf from '@tensorflow/tfjs';
 import { Observation } from './ObservationSpace';
 import { WEAPON_CHOICES } from './ActionSpace';
 
