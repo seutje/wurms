@@ -24,7 +24,7 @@ export class Wurm extends Sprite {
     }
   }
 
-  public collidesWith(projectile: any): boolean {
+  public collidesWith = (projectile: any): boolean => {
     // Simple bounding box collision detection
     return (
       this.x < projectile.x + projectile.width &&
