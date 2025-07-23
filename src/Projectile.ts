@@ -16,6 +16,7 @@ export class Projectile extends Sprite {
       width: radius * 2,
       height: radius * 2,
       color: 'red',
+      ddy: 0.1 // gravity
     });
     this.x = x;
     this.y = y;
@@ -24,7 +25,6 @@ export class Projectile extends Sprite {
   }
 
   public update() {
-    this.dy += 0.1; // gravity
     this.advance();
   }
 }
