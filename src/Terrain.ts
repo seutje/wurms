@@ -37,13 +37,13 @@ export class Terrain extends GameObject {
     this.context.drawImage(this.terrainCanvas, 0, 0);
   }
 
-  public destroy(x: number, y: number, radius: number) {
+  public destroy = (x: number, y: number, radius: number) => {
     this.terrainContext.globalCompositeOperation = 'destination-out';
     this.terrainContext.beginPath();
     this.terrainContext.arc(x, y, radius, 0, Math.PI * 2);
     this.terrainContext.fill();
     this.terrainContext.globalCompositeOperation = 'source-over';
-  }
+  };
 
   public isColliding = (x: number, y: number): boolean => {
     if (x < 0 || x >= this.width || y < 0 || y >= this.height) {
