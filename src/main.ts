@@ -26,10 +26,10 @@ const playAgainButton = document.getElementById('play-again-button') as HTMLButt
 
 // Weapon properties (defined globally as they are used in both main game and AI demo)
 const weaponProperties: { [key: string]: { radius: number, damage: number } } = {
-  bazooka: { radius: 50, damage: 20 },
-  grenade: { radius: 40, damage: 15 },
-  mortar: { radius: 60, damage: 25 },
-  nuke: { radius: 100, damage: 50 },
+  bazooka: { radius: 5, damage: 30 },
+  grenade: { radius: 5, damage: 40 },
+  mortar: { radius: 5, damage: 35 },
+  nuke: { radius: 10, damage: 100 },
 };
 
 // Main Game Initialization and Loop

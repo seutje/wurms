@@ -75,10 +75,10 @@ async function train() {
 
       // Simulate action (fire projectile)
       const weaponProperties: { [key: string]: { radius: number; damage: number; } } = {
-        bazooka: { radius: 10, damage: 30 },
-        grenade: { radius: 20, damage: 40 },
-        mortar: { radius: 15, damage: 35 },
-        nuke: { radius: 50, damage: 100 },
+        bazooka: { radius: 5, damage: 30 },
+        grenade: { radius: 5, damage: 40 },
+        mortar: { radius: 5, damage: 35 },
+        nuke: { radius: 10, damage: 100 },
       };
       const weaponName = WEAPON_CHOICES[weaponIdx];
       const { radius, damage } = weaponProperties[weaponName];
