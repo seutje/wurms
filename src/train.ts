@@ -11,6 +11,7 @@ import { getObservation } from './ai/ObservationSpace.js';
 import { WEAPON_CHOICES } from './ai/ActionSpace.js';
 import { weaponProperties } from './WeaponProperties.js';
 import { calculateReward } from './ai/RewardFunction.js';
+import { handleProjectileWurmCollision } from "./collision.js";
 
 // Setup JSDOM for Kontra.js headless environment
 const dom = new JSDOM(`<!DOCTYPE html><body><canvas id="game"></canvas></body>`);
@@ -108,6 +109,18 @@ async function train() {
         for (let i = projectiles.length - 1; i >= 0; i--) {
           const p = projectiles[i];
           p.update();
+
+          if (handleProjectileWurmCollision(p, playerWurm, terrain)) {
+            console.log(`Player Wurm took damage. Health: ${playerWurm.health}`);
+            projectiles.splice(i, 1);
+            continue;
+          }
+
+          if (handleProjectileWurmCollision(p, aiWurm, terrain)) {
+            console.log(`AI Wurm took damage. Health: ${aiWurm.health}`);
+            projectiles.splice(i, 1);
+            continue;
+          }
 
           if (terrain.isColliding(p.x, p.y)) {
             console.log(`Projectile collided with terrain at x=${p.x}, y=${p.y}!`);

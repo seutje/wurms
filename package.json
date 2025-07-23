@@ -7,7 +7,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "train": "tsc && node dist-train/train.js $@",
-    "test": "vitest",
+    "test": "vitest --run",
     "deploy": "gh-pages -d dist"
   },
   "keywords": [],

@@ -9,6 +9,7 @@ import { getObservation } from './ai/ObservationSpace.js';
 import { WEAPON_CHOICES } from './ai/ActionSpace.js';
 import { weaponProperties } from './WeaponProperties.js';
 import { SoundManager } from './SoundManager.js';
+import { handleProjectileWurmCollision } from "./collision.js";
 
 // Sound Manager
 const soundManager = new SoundManager();
@@ -145,6 +146,28 @@ function startGame() {
           for (let i = projectiles.length - 1; i >= 0; i--) {
             const projectile = projectiles[i];
             projectile.update();
+
+            if (handleProjectileWurmCollision(projectile, playerWurm, terrain)) {
+              projectiles.splice(i, 1);
+              const indexInCurrentTurn = currentTurnProjectiles.indexOf(projectile);
+              if (indexInCurrentTurn > -1) {
+                currentTurnProjectiles.splice(indexInCurrentTurn, 1);
+              }
+              soundManager.playSound('explosion');
+              soundManager.playSound('damage');
+              continue;
+            }
+
+            if (handleProjectileWurmCollision(projectile, aiWurm, terrain)) {
+              projectiles.splice(i, 1);
+              const indexInCurrentTurn = currentTurnProjectiles.indexOf(projectile);
+              if (indexInCurrentTurn > -1) {
+                currentTurnProjectiles.splice(indexInCurrentTurn, 1);
+              }
+              soundManager.playSound('explosion');
+              soundManager.playSound('damage');
+              continue;
+            }
 
             // Check collision with terrain
             if (terrain.isColliding(projectile.x + projectile.radius, projectile.y + projectile.radius)) {
