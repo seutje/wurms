@@ -104,7 +104,7 @@ function startGame() {
       const power = parseFloat(powerInput.value);
       const weapon = weaponSelect.value;
 
-      const { radius, damage } = weaponProperties[weapon];
+      const { radius, damage, explosionRadius } = weaponProperties[weapon];
 
       // Fire from player wurm's position
       const startX = playerWurm.x;

@@ -6,8 +6,9 @@ export class Projectile extends Sprite {
   
   public radius: number;
   public damage: number;
+  public explosionRadius: number;
 
-  constructor(x: number, y: number, dx: number, dy: number, radius: number, damage: number) {
+  constructor(x: number, y: number, dx: number, dy: number, radius: number, damage: number, explosionRadius: number) {
     super({
       x,
       y,
@@ -22,6 +23,7 @@ export class Projectile extends Sprite {
     this.y = y;
     this.radius = radius;
     this.damage = damage;
+    this.explosionRadius = explosionRadius;
   }
 
   public update() {
