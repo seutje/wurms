@@ -2,6 +2,9 @@ import { init, GameLoop, initPointer, onPointer } from 'kontra';
 import { Terrain } from './Terrain';
 import { Projectile } from './Projectile';
 import { Wurm } from './Wurm';
+import { DQNModel } from './ai/DQNModel';
+import { getObservation } from './ai/ObservationSpace';
+import { WEAPON_CHOICES } from './ai/ActionSpace';
 
 const { canvas, context } = init('game');
 initPointer();
@@ -14,12 +17,29 @@ const GameState = {
   PLANNING: 'PLANNING',
   EXECUTION: 'EXECUTION',
   RESOLUTION: 'RESOLUTION',
+  GAME_OVER: 'GAME_OVER',
 };
 let currentGameState = GameState.PLANNING;
 
 // Wurms
 const playerWurm = new Wurm(100, 100, 100, 'blue');
 const aiWurm = new Wurm(canvas.width - 100, 100, 100, 'green');
+
+// AI Model
+let aiModel: DQNModel | null = null;
+const observationSpaceSize = 6 + (canvas.width / 20); // 6 for wurm data + terrain heights
+const actionSpaceSize = WEAPON_CHOICES.length * 10 * 10; // weapon * angle_bins * power_bins (simplified)
+
+async function loadModel() {
+  try {
+    aiModel = await DQNModel.load('file://./src/models/dqn-model');
+    console.log('AI Model loaded successfully.');
+  } catch (error) {
+    console.warn('Could not load AI model, using random AI.', error);
+    // Fallback to random AI if model not found
+  }
+}
+loadModel();
 
 // UI Elements
 const weaponSelect = document.getElementById('weapon') as HTMLSelectElement;
@@ -118,11 +138,32 @@ const loop = GameLoop({
         }
         break;
       case GameState.RESOLUTION:
-        // Evaluate game state, transition to next turn or PLANNING
-        // For now, just transition back to planning after a short delay
-        setTimeout(() => {
-          currentGameState = GameState.PLANNING;
-        }, 1000);
+        // AI takes its turn
+        const aiAngle = Math.random() * 180;
+        const aiPower = Math.random() * 100;
+        const aiWeaponOptions = Object.keys(weaponProperties);
+        const aiWeapon = aiWeaponOptions[Math.floor(Math.random() * aiWeaponOptions.length)];
+
+        const { radius: aiRadius, damage: aiDamage } = weaponProperties[aiWeapon];
+
+        const aiStartX = aiWurm.x;
+        const aiStartY = aiWurm.y;
+
+        const aiRadians = aiAngle * Math.PI / 180;
+        const aiVelX = aiPower * Math.cos(aiRadians) * 0.1;
+        const aiVelY = aiPower * Math.sin(aiRadians) * -0.1;
+
+        const aiProjectile = new Projectile(
+          aiStartX,
+          aiStartY,
+          aiVelX,
+          aiVelY,
+          aiRadius,
+          aiDamage
+        );
+        projectiles.push(aiProjectile);
+
+        currentGameState = GameState.EXECUTION; // AI fires, so back to execution
         break;
       case GameState.GAME_OVER:
         // Game has ended, stop updates or show game over screen

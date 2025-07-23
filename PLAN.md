@@ -138,13 +138,13 @@ The reward function is crucial for training. It will guide the AI's learning pro
 *   [x] Add multiple weapon types.
 
 ### Milestone 3: AI Implementation (2-3 weeks)
-*   [ ] Create a simple "random" AI that chooses actions randomly.
-*   [ ] Define the observation and action spaces for the RL model.
-*   [ ] Integrate TensorFlow.js into the project.
-*   [ ] Build the RL model (DQN or PPO).
-*   [ ] Implement the reward function.
-*   [ ] Create the training script (`npm run train`).
-*   [ ] Implement model saving and loading.
+*   [x] Create a simple "random" AI that chooses actions randomly.
+*   [x] Define the observation and action spaces for the RL model.
+*   [x] Integrate TensorFlow.js into the project.
+*   [x] Build the RL model (DQN or PPO).
+*   [x] Implement the reward function.
+*   [x] Create the training script (`npm run train`).
+*   [x] Implement model saving and loading.
 
 ### Milestone 4: UI/UX and Polish (1 week)
 *   [ ] Design and implement the Start Screen with the AI vs AI demo.
