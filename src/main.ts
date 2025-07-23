@@ -36,8 +36,8 @@ function startGame() {
   const context = canvas.getContext('2d') as CanvasRenderingContext2D;
 
   // Set initial canvas size
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
+  canvas.width = 800;
+  canvas.height = 600;
 
   init(canvas);
 
@@ -45,8 +45,8 @@ function startGame() {
 
   // Handle window resize
   window.addEventListener('resize', () => {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    canvas.width = 800;
+    canvas.height = 600;
     init(canvas); // Re-initialize Kontra with new canvas size
   });
   const projectiles: Projectile[] = [];
@@ -277,8 +277,8 @@ function startGame() {
 // AI vs AI Demo Loop
 const aiDemoCanvasContainer = document.getElementById('ai-demo-canvas-container') as HTMLElement;
 const aiDemoCanvas = document.createElement('canvas');
-aiDemoCanvas.width = 400;
-aiDemoCanvas.height = 300;
+aiDemoCanvas.width = 800;
+aiDemoCanvas.height = 600;
 aiDemoCanvasContainer.appendChild(aiDemoCanvas);
 
 init(aiDemoCanvas);
