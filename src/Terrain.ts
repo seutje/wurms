@@ -45,11 +45,11 @@ export class Terrain extends GameObject {
     this.terrainContext.globalCompositeOperation = 'source-over';
   }
 
-  public isColliding(x: number, y: number): boolean {
+  public isColliding = (x: number, y: number): boolean => {
     if (x < 0 || x >= this.width || y < 0 || y >= this.height) {
       return false;
     }
     const pixel = this.terrainContext.getImageData(x, y, 1, 1).data;
     return pixel[3] > 0;
-  }
+  };
 }
