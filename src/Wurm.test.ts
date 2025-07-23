@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { Wurm } from './Wurm';
+import { Wurm } from './Wurm.js';
 
 // Mock the Sprite class from Kontra.js
 vi.mock('kontra', () => ({
@@ -17,7 +17,7 @@ vi.mock('kontra', () => ({
       this.color = properties.color;
     }
     // Mock collidesWith method for testing
-    collidesWith(obj: any) {
+    collidesWith(_obj: any) {
       return false; // Simplified for now
     }
   },

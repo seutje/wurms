@@ -1,9 +1,8 @@
-import { Wurm } from '../Wurm';
-import { Projectile } from '../Projectile';
+import { Wurm } from '../Wurm.js';
 
 export function calculateReward(
-  playerWurm: Wurm,
-  aiWurm: Wurm,
+  _playerWurm: Wurm,
+  _aiWurm: Wurm,
   hitEnemy: boolean,
   hitSelf: boolean,
   gameEnded: boolean,

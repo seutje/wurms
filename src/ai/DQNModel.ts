@@ -1,6 +1,5 @@
 import * as tf from '@tensorflow/tfjs';
-import { Observation } from './ObservationSpace';
-import { WEAPON_CHOICES } from './ActionSpace';
+import { Observation } from './ObservationSpace.js';
 
 export class DQNModel {
   private model: tf.LayersModel;
@@ -50,8 +49,8 @@ export class DQNModel {
     // Assuming inputShape and outputSize can be inferred or are fixed
     // For now, we'll need to pass them or infer from the loaded model
     // This is a placeholder, actual implementation might need more robust handling
-    const inputShape = loadedModel.layers[0].input.shape.slice(1);
-    const outputSize = loadedModel.layers[loadedModel.layers.length - 1].units;
+    const inputShape = (loadedModel.layers[0].input as any).shape.slice(1);
+    const outputSize = (loadedModel.layers[loadedModel.layers.length - 1] as any).units;
     const dqnModel = new DQNModel(inputShape as number[], outputSize);
     dqnModel.model = loadedModel;
     return dqnModel;

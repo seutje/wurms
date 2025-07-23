@@ -19,6 +19,7 @@
     "@tensorflow/tfjs": "^4.22.0",
     "@tensorflow/tfjs-core": "^4.22.0",
     "@tensorflow/tfjs-layers": "^4.22.0",
+    "@tensorflow/tfjs-node": "^4.22.0",
     "kontra": "^10.0.2",
     "typescript": "^5.8.3",
     "vite": "^7.0.5"

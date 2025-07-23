@@ -1,5 +1,6 @@
 declare module 'kontra' {
   export class GameObject {
+    constructor(properties?: object);
     x: number;
     y: number;
     width: number;

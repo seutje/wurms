@@ -1,4 +1,5 @@
-import { GameObject } from 'kontra';
+import kontra from 'kontra';
+const { GameObject } = kontra;
 
 export class Terrain extends GameObject {
   private terrainCanvas: HTMLCanvasElement;

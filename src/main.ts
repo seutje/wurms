@@ -1,11 +1,12 @@
-import { init, GameLoop, initPointer } from 'kontra';
-import { Terrain } from './Terrain';
-import { Projectile } from './Projectile';
-import { Wurm } from './Wurm';
-import { DQNModel } from './ai/DQNModel';
-import { getObservation } from './ai/ObservationSpace';
-import { WEAPON_CHOICES } from './ai/ActionSpace';
-import { SoundManager } from './SoundManager';
+import kontra from 'kontra';
+const { init, GameLoop } = kontra;
+import { Terrain } from './Terrain.js';
+import { Projectile } from './Projectile.js';
+import { Wurm } from './Wurm.js';
+import { DQNModel } from './ai/DQNModel.js';
+import { getObservation } from './ai/ObservationSpace.js';
+import { WEAPON_CHOICES } from './ai/ActionSpace.js';
+import { SoundManager } from './SoundManager.js';
 
 // Sound Manager
 const soundManager = new SoundManager();
@@ -38,7 +39,6 @@ function startGame() {
   const canvas = document.getElementById('game') as HTMLCanvasElement;
   const context = canvas.getContext('2d') as CanvasRenderingContext2D;
   init(canvas);
-  initPointer();
 
   const terrain = new Terrain(canvas.width, canvas.height);
   const projectiles: Projectile[] = [];

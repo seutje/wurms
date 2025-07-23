@@ -1,8 +1,8 @@
-import { Sprite } from 'kontra';
+import kontra from 'kontra';
+const { Sprite } = kontra;
 
 export class Projectile extends Sprite {
-  public x: number;
-  public y: number;
+  
   public radius: number;
   public damage: number;
 
