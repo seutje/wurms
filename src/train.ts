@@ -28,6 +28,13 @@ init(canvas);
 const game = new Game(canvas, canvas.getContext('2d')!);
 const { playerWurm, aiWurm, terrain } = game;
 
+function getDummyPlayerShot() {
+  const weapon = WEAPON_CHOICES[Math.floor(Math.random() * WEAPON_CHOICES.length)];
+  const angle = Math.random() * 180;
+  const power = Math.random() * 100;
+  return { weapon, angle, power };
+}
+
 // DQN Model setup
 const observationSpaceSize = 6 + canvas.width / 20;
 const actionSpaceSize = WEAPON_CHOICES.length * 10 * 10;
@@ -56,10 +63,10 @@ async function train() {
     let done = false;
     let totalReward = 0;
     let steps = 0;
-    let prevDistance = Math.abs(playerWurm.x - aiWurm.x);
+    let prevDistance = Math.abs(aiWurm.x - playerWurm.x);
 
     while (!done) {
-      const observation = getObservation(playerWurm, aiWurm, terrain);
+      const observation = getObservation(aiWurm, playerWurm, terrain);
       const qValues = dqnModel.predict(observation);
       let actionIndex: number;
 
@@ -79,15 +86,19 @@ async function train() {
       const angle = angleBin * 18; // 0-180 in 10 bins
       const power = powerBin * 10; // 0-100 in 10 bins
 
-      const prevPlayerHealth = playerWurm.health;
       const prevAiHealth = aiWurm.health;
+      const prevPlayerHealth = playerWurm.health;
 
       const weaponName = WEAPON_CHOICES[weaponIdx];
-      game.fire(playerWurm, weaponName, angle, power);
+      game.fire(aiWurm, weaponName, angle, power);
+
+      const dummy = getDummyPlayerShot();
+      game.fire(playerWurm, dummy.weapon, dummy.angle, dummy.power);
+
       game.simulateUntilProjectilesResolve();
 
-      const nextObservation = getObservation(playerWurm, aiWurm, terrain);
-      const newDistance = Math.abs(playerWurm.x - aiWurm.x);
+      const nextObservation = getObservation(aiWurm, playerWurm, terrain);
+      const newDistance = Math.abs(aiWurm.x - playerWurm.x);
       const distanceDelta = newDistance - prevDistance;
       prevDistance = newDistance;
 
@@ -95,13 +106,13 @@ async function train() {
 
       // Apply damage to wurms (already done in the projectile loop)
 
-      const hitEnemy = aiWurm.health < prevAiHealth;
-      const hitSelf = playerWurm.health < prevPlayerHealth;
+      const hitEnemy = playerWurm.health < prevPlayerHealth;
+      const hitSelf = aiWurm.health < prevAiHealth;
       const gameEnded = playerWurm.health <= 0 || aiWurm.health <= 0;
-      const playerWon = aiWurm.health <= 0 && playerWurm.health > 0;
       const aiWon = playerWurm.health <= 0 && aiWurm.health > 0;
+      const playerWon = aiWurm.health <= 0 && playerWurm.health > 0;
 
-      const reward = calculateReward(playerWurm, aiWurm, hitEnemy, hitSelf, gameEnded, playerWon, aiWon, distanceDelta);
+      const reward = calculateReward(aiWurm, playerWurm, hitEnemy, hitSelf, gameEnded, playerWon, aiWon, distanceDelta);
       totalReward += reward;
 
       const experience: Experience = {
