@@ -22,7 +22,6 @@ export class Wurm extends Sprite {
   }
 
   public draw = () => {
-    // body
     this.context.fillStyle = this.color;
     this.context.fillRect(this.x, this.y, this.width, this.height);
 
@@ -31,7 +30,7 @@ export class Wurm extends Sprite {
     const centerY = this.y;
     const length = this.width / 2;
     const radians = this.barrelAngle * Math.PI / 180;
-    this.context.strokeStyle = 'black';
+    this.context.strokeStyle = 'white';
     this.context.beginPath();
     this.context.moveTo(centerX, centerY);
     this.context.lineTo(centerX + Math.cos(radians) * length, centerY - Math.sin(radians) * length);
