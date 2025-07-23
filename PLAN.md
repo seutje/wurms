@@ -124,11 +124,11 @@ The reward function is crucial for training. It will guide the AI's learning pro
 ## 6. Development Roadmap
 
 ### Milestone 1: Basic Game Engine (1-2 weeks)
-*   [ ] Setup project with TypeScript, Vite/Webpack.
-*   [ ] Implement the main game loop.
-*   [ ] Create the terrain generation and rendering system.
-*   [ ] Implement the terrain destruction logic.
-*   [ ] Implement the physics for projectile motion.
+*   [x] Setup project with TypeScript, Vite/Webpack.
+*   [x] Implement the main game loop.
+*   [x] Create the terrain generation and rendering system.
+*   [x] Implement the terrain destruction logic.
+*   [x] Implement the physics for projectile motion.
 
 ### Milestone 2: Core Gameplay (1 week)
 *   [ ] Implement player controls for weapon, angle, and power.
