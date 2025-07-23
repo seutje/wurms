@@ -222,8 +222,9 @@ const aiDemoLoop = GameLoop({
       const { radius, damage, explosionRadius } = weaponProperties[aiWeapon];
 
       const radians = aiAngle * Math.PI / 180;
-      const startX = aiDemoWurm1.x + aiDemoWurm1.width / 2 + Math.cos(radians) * radius - radius;
-      const startY = aiDemoWurm1.y + aiDemoWurm1.height / 2 - Math.sin(radians) * radius - radius;
+      const offset = aiDemoWurm1.width / 2 + radius + 1;
+      const startX = aiDemoWurm1.x + aiDemoWurm1.width / 2 + Math.cos(radians) * offset - radius;
+      const startY = aiDemoWurm1.y + aiDemoWurm1.height / 2 - Math.sin(radians) * offset - radius;
       const velX = aiPower * Math.cos(radians) * 0.15;
       const velY = aiPower * Math.sin(radians) * -0.15;
 
