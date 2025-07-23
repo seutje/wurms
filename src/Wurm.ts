@@ -17,7 +17,7 @@ export class Wurm extends Sprite {
     this.health = health;
   }
 
-  public takeDamage(amount: number) {
+  public takeDamage = (amount: number) => {
     this.health -= amount;
     if (this.health < 0) {
       this.health = 0;
