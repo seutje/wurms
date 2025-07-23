@@ -41,14 +41,16 @@ export class Wurm extends Sprite {
     return distance < this.width / 2 + projectile.radius;
   }
 
-  public update = (terrain: any) => {
-    const belowX = Math.floor(this.x + this.width / 2);
-    const belowY = Math.floor(this.y + this.height + 1);
-    if (!terrain.isColliding(belowX, belowY)) {
-      this.dy += 0.2;
-      this.y += this.dy;
-    } else {
-      this.dy = 0;
+  public update = (terrain?: any) => {
+    if (terrain) {
+      const belowX = Math.floor(this.x + this.width / 2);
+      const belowY = Math.floor(this.y + this.height + 1);
+      if (!terrain.isColliding(belowX, belowY)) {
+        this.dy += 0.2;
+        this.y += this.dy;
+      } else {
+        this.dy = 0;
+      }
     }
   }
 }
