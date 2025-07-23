@@ -54,6 +54,7 @@ async function train() {
 
     while (!done) {
       const observation = getObservation(playerWurm, aiWurm, terrain);
+      const qValues = dqnModel.predict(observation);
       let actionIndex: number;
 
       if (Math.random() < epsilon) {
@@ -61,8 +62,7 @@ async function train() {
         actionIndex = Math.floor(Math.random() * actionSpaceSize);
       } else {
         // Exploit: choose best action from model prediction
-        const prediction = dqnModel.predict(observation);
-        actionIndex = tf.argMax(prediction).dataSync()[0];
+        actionIndex = tf.argMax(qValues).dataSync()[0];
       }
 
       // Convert actionIndex back to weapon, angle, power
@@ -137,8 +137,10 @@ async function train() {
       totalReward += reward;
 
       // Q-learning update (simplified for now)
-      const target = tf.tensor1d([reward]); // This needs to be Q(s,a) + gamma * max(Q(s',a'))
-      await dqnModel.train(dqnModel.predict(observation), target);
+      const targetArray = qValues.arraySync()[0] as number[];
+      targetArray[actionIndex] = reward;
+      const target = tf.tensor2d([targetArray], [1, actionSpaceSize]);
+      await dqnModel.train(observation, target);
 
       if (gameEnded) {
         done = true;

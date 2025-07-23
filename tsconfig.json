@@ -15,5 +15,6 @@
     "noImplicitReturns": true,
     "outDir": "./dist-train"
   },
-  "include": ["src"]
+  "include": ["src"],
+  "exclude": ["src/**/*.test.ts"]
 }

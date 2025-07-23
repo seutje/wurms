@@ -1,4 +1,5 @@
-import kontra from 'kontra';
+// Use kontra's ESM entry so training can run in Node
+import kontra from 'kontra/kontra.mjs';
 const { Sprite } = kontra;
 
 export class Wurm extends Sprite {

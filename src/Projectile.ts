@@ -1,4 +1,5 @@
-import kontra from 'kontra';
+// Import from the ESM build so that Node can resolve the module
+import kontra from 'kontra/kontra.mjs';
 const { Sprite } = kontra;
 
 export class Projectile extends Sprite {
