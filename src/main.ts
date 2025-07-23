@@ -112,8 +112,8 @@ function startGame() {
 
       // Convert angle and power to velocity components
       const radians = angle * Math.PI / 180;
-      const velX = power * Math.cos(radians) * 0.1; // Scale down for reasonable speed
-      const velY = power * Math.sin(radians) * -0.1; // Negative for upward movement
+      const velX = power * Math.cos(radians) * 0.15; // Scale down for reasonable speed
+      const velY = power * Math.sin(radians) * -0.15; // Negative for upward movement
 
       const projectile = new Projectile(
         startX,
@@ -229,8 +229,8 @@ function startGame() {
           const aiStartY = aiWurm.y - 10; // Spawn slightly above the wurm
 
           const aiRadians = aiAngle * Math.PI / 180;
-          const aiVelX = aiPower * Math.cos(aiRadians) * 0.1;
-          const aiVelY = aiPower * Math.sin(aiRadians) * -0.1;
+          const aiVelX = aiPower * Math.cos(aiRadians) * 0.15;
+          const aiVelY = aiPower * Math.sin(aiRadians) * -0.15;
 
           const aiProjectile = new Projectile(
             aiStartX,
@@ -303,8 +303,8 @@ const aiDemoLoop = GameLoop({
       const startY = aiDemoWurm1.y;
 
       const radians = aiAngle * Math.PI / 180;
-      const velX = aiPower * Math.cos(radians) * 0.1;
-      const velY = aiPower * Math.sin(radians) * -0.1;
+      const velX = aiPower * Math.cos(radians) * 0.15;
+      const velY = aiPower * Math.sin(radians) * -0.15;
 
       const projectile = new Projectile(
         startX,
