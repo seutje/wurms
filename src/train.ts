@@ -78,7 +78,7 @@ async function train() {
 
       // Simulate action (fire projectile)
       const weaponName = WEAPON_CHOICES[weaponIdx];
-      const { radius, damage } = weaponProperties[weaponName];
+      const { radius, damage, explosionRadius } = weaponProperties[weaponName];
 
       const startX = playerWurm.x;
       const startY = playerWurm.y;
@@ -92,7 +92,8 @@ async function train() {
         velX,
         velY,
         radius,
-        damage
+        damage,
+        explosionRadius
       );
       projectiles.push(projectile);
       console.log(`Projectile created: x=${startX}, y=${startY}, velX=${velX}, velY=${velY}`);
@@ -110,7 +111,7 @@ async function train() {
 
           if (terrain.isColliding(p.x, p.y)) {
             console.log(`Projectile collided with terrain at x=${p.x}, y=${p.y}!`);
-            terrain.destroy(p.x, p.y, p.radius);
+            terrain.destroy(p.x, p.y, p.explosionRadius);
             projectiles.splice(i, 1);
             // Apply damage to wurms
             if (playerWurm.collidesWith(p)) {
