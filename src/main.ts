@@ -1,14 +1,14 @@
 // Import kontra from its ESM build for compatibility with both browser and Node
 import kontra from 'kontra/kontra.mjs';
 const { init, GameLoop } = kontra;
-import { Terrain } from './Terrain.ts';
-import { Projectile } from './Projectile.ts';
-import { Wurm } from './Wurm.ts';
-import { DQNModel } from './ai/DQNModel.ts';
-import { getObservation } from './ai/ObservationSpace.ts';
-import { WEAPON_CHOICES } from './ai/ActionSpace.ts';
-import { weaponProperties } from './WeaponProperties.ts';
-import { SoundManager } from './SoundManager.ts';
+import { Terrain } from './Terrain.js';
+import { Projectile } from './Projectile.js';
+import { Wurm } from './Wurm.js';
+import { DQNModel } from './ai/DQNModel.js';
+import { getObservation } from './ai/ObservationSpace.js';
+import { WEAPON_CHOICES } from './ai/ActionSpace.js';
+import { weaponProperties } from './WeaponProperties.js';
+import { SoundManager } from './SoundManager.js';
 
 // Sound Manager
 const soundManager = new SoundManager();
@@ -25,8 +25,7 @@ const gameOverMessage = document.getElementById('game-over-message') as HTMLElem
 const startGameButton = document.getElementById('start-game-button') as HTMLButtonElement;
 const playAgainButton = document.getElementById('play-again-button') as HTMLButtonElement;
 
-// Weapon properties (defined globally as they are used in both main game and AI demo)
-import { weaponProperties } from './WeaponProperties.ts';
+
 
 // Main Game Initialization and Loop
 let mainGameLoop: any;
@@ -51,6 +50,7 @@ function startGame() {
     init(canvas); // Re-initialize Kontra with new canvas size
   });
   const projectiles: Projectile[] = [];
+  let currentTurnProjectiles: Projectile[] = [];
 
   // Game States
   const GameState = {
@@ -124,6 +124,7 @@ function startGame() {
         damage
       );
       projectiles.push(projectile);
+      currentTurnProjectiles.push(projectile);
       soundManager.playSound('fire');
 
       currentGameState = GameState.EXECUTION;
@@ -139,7 +140,7 @@ function startGame() {
           break;
         case GameState.EXECUTION:
           // Projectiles are in flight
-          let allProjectilesResolved = true;
+          
           for (let i = projectiles.length - 1; i >= 0; i--) {
             const projectile = projectiles[i];
             projectile.update();
@@ -148,6 +149,11 @@ function startGame() {
             if (terrain.isColliding(projectile.x, projectile.y)) {
               terrain.destroy(projectile.x, projectile.y, projectile.radius);
               projectiles.splice(i, 1);
+              // Remove from currentTurnProjectiles if it was one of them
+              const indexInCurrentTurn = currentTurnProjectiles.indexOf(projectile);
+              if (indexInCurrentTurn > -1) {
+                currentTurnProjectiles.splice(indexInCurrentTurn, 1);
+              }
               soundManager.playSound('explosion');
               // For now, a hit on terrain also means damage to nearby wurms
               // This will be refined later with explosion radius and damage falloff
@@ -162,12 +168,15 @@ function startGame() {
             } else if (projectile.x < 0 || projectile.x > canvas.width || projectile.y > canvas.height) {
               // Remove projectiles that go off-screen
               projectiles.splice(i, 1);
-            } else {
-              allProjectilesResolved = false;
+              // Remove from currentTurnProjectiles if it was one of them
+              const indexInCurrentTurn = currentTurnProjectiles.indexOf(projectile);
+              if (indexInCurrentTurn > -1) {
+                currentTurnProjectiles.splice(indexInCurrentTurn, 1);
+              }
             }
           }
 
-          if (allProjectilesResolved && projectiles.length === 0) {
+          if (currentTurnProjectiles.length === 0) { // Only transition when current turn's projectiles are resolved
             // Check win/loss conditions
             if (playerWurm.health <= 0 && aiWurm.health <= 0) {
               gameOverMessage.textContent = "Draw!";
@@ -231,6 +240,7 @@ function startGame() {
             aiDamage
           );
           projectiles.push(aiProjectile);
+          currentTurnProjectiles.push(aiProjectile);
           soundManager.playSound('fire');
 
           currentGameState = GameState.EXECUTION; // AI fires, so back to execution

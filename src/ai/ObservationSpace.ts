@@ -1,5 +1,5 @@
-import { Wurm } from '../Wurm.ts';
-import { Terrain } from '../Terrain.ts';
+import { Wurm } from '../Wurm.js';
+import { Terrain } from '../Terrain.js';
 
 export interface Observation {
   playerWurmX: number;

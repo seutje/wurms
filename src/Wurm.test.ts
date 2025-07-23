@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { Wurm } from './Wurm.ts';
+import { Wurm } from './Wurm.js';
 
 // Mock the Sprite class from Kontra.js
 // Mock the kontra ESM build used in the source files

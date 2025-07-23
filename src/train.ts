@@ -2,15 +2,15 @@ import { JSDOM } from 'jsdom';
 import * as tf from '@tensorflow/tfjs-core';
 import '@tensorflow/tfjs-node'; // Use tfjs-node for headless environment
 
-import { init } from './kontra.mock.ts';
-import { Terrain } from './Terrain.ts';
-import { Projectile } from './Projectile.ts';
-import { Wurm } from './Wurm.ts';
-import { DQNModel } from './ai/DQNModel.ts';
-import { getObservation } from './ai/ObservationSpace.ts';
-import { WEAPON_CHOICES } from './ai/ActionSpace.ts';
-import { weaponProperties } from './WeaponProperties.ts';
-import { calculateReward } from './ai/RewardFunction.ts';
+import { init } from './kontra.mock.js';
+import { Terrain } from './Terrain.js';
+import { Projectile } from './Projectile.js';
+import { Wurm } from './Wurm.js';
+import { DQNModel } from './ai/DQNModel.js';
+import { getObservation } from './ai/ObservationSpace.js';
+import { WEAPON_CHOICES } from './ai/ActionSpace.js';
+import { weaponProperties } from './WeaponProperties.js';
+import { calculateReward } from './ai/RewardFunction.js';
 
 // Setup JSDOM for Kontra.js headless environment
 const dom = new JSDOM(`<!DOCTYPE html><body><canvas id="game"></canvas></body>`);
@@ -26,7 +26,7 @@ canvas.height = 600;
 init(canvas);
 
 // Game setup (similar to main.ts)
-const terrain = new Terrain(canvas.width, canvas.height);
+const terrain = new Terrain(canvas.width, canvas.height, canvas.getContext('2d')!);
 const playerWurm = new Wurm(100, 100, 100, 'blue');
 const aiWurm = new Wurm(canvas.width - 100, 100, 100, 'green');
 const projectiles: Projectile[] = [];
@@ -37,7 +37,7 @@ const actionSpaceSize = WEAPON_CHOICES.length * 10 * 10; // weapon * angle_bins 
 const dqnModel = new DQNModel([observationSpaceSize], actionSpaceSize);
 
 // Training parameters
-const numEpisodes = 100;
+const numEpisodes = parseInt(process.argv[2]) || 100;
 const epsilonDecay = 0.995;
 let epsilon = 1.0; // Exploration-exploitation trade-off
 
@@ -75,7 +75,6 @@ async function train() {
       const power = powerBin * 10; // 0-100 in 10 bins
 
       // Simulate action (fire projectile)
-      import { weaponProperties } from './WeaponProperties.ts';
       const weaponName = WEAPON_CHOICES[weaponIdx];
       const { radius, damage } = weaponProperties[weaponName];
 
