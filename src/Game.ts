@@ -89,7 +89,6 @@ export class Game {
       } else if (
         projectile.x + projectile.radius * 2 < 0 ||
         projectile.x > this.canvas.width ||
-        projectile.y + projectile.radius * 2 < 0 ||
         projectile.y > this.canvas.height
       ) {
         this.projectiles.splice(i, 1);
