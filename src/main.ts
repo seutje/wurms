@@ -136,6 +136,8 @@ function startGame() {
 
   mainGameLoop = GameLoop({
     update: () => {
+      playerWurm.update(terrain);
+      aiWurm.update(terrain);
       switch (currentGameState) {
         case GameState.PLANNING:
           // Player is choosing actions
@@ -315,6 +317,8 @@ const aiDemoProjectiles: Projectile[] = [];
 
 const aiDemoLoop = GameLoop({
   update: () => {
+    aiDemoWurm1.update(aiDemoTerrain);
+    aiDemoWurm2.update(aiDemoTerrain);
     // Simplified AI logic for demo
     if (aiDemoProjectiles.length === 0) {
       const aiAngle = Math.random() * 180;
