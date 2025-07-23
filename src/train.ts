@@ -81,9 +81,9 @@ async function train() {
       const weaponName = WEAPON_CHOICES[weaponIdx];
       const { radius, damage, explosionRadius } = weaponProperties[weaponName];
 
-      const startX = playerWurm.x;
-      const startY = playerWurm.y;
       const radians = angle * Math.PI / 180;
+      const startX = playerWurm.x + playerWurm.width / 2 + Math.cos(radians) * radius - radius;
+      const startY = playerWurm.y + playerWurm.height / 2 - Math.sin(radians) * radius - radius;
       const velX = power * Math.cos(radians) * 0.15;
       const velY = power * Math.sin(radians) * -0.15;
 
