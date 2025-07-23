@@ -1,6 +1,7 @@
 import { JSDOM } from 'jsdom';
 import * as tf from '@tensorflow/tfjs-core';
 import '@tensorflow/tfjs-node'; // Use tfjs-node for headless environment
+import { promises as fs } from 'fs';
 
 import { init } from './kontra.mock.js';
 import { Game } from './Game.js';
@@ -8,6 +9,7 @@ import { DQNModel } from './ai/DQNModel.js';
 import { getObservation } from './ai/ObservationSpace.js';
 import { WEAPON_CHOICES } from './ai/ActionSpace.js';
 import { calculateReward } from './ai/RewardFunction.js';
+import { ReplayBuffer, Experience } from './ai/ReplayBuffer.js';
 
 // Setup JSDOM for Kontra.js headless environment
 const dom = new JSDOM(`<!DOCTYPE html><body><canvas id="game"></canvas></body>`);
@@ -27,15 +29,24 @@ const game = new Game(canvas, canvas.getContext('2d')!);
 const { playerWurm, aiWurm, terrain } = game;
 
 // DQN Model setup
-const observationSpaceSize = 6 + (canvas.width / 20); // 6 for wurm data + terrain heights
-const actionSpaceSize = WEAPON_CHOICES.length * 10 * 10; // weapon * angle_bins * power_bins (simplified)
+const observationSpaceSize = 6 + canvas.width / 20;
+const actionSpaceSize = WEAPON_CHOICES.length * 10 * 10;
 const dqnModel = new DQNModel([observationSpaceSize], actionSpaceSize);
+const targetModel = new DQNModel([observationSpaceSize], actionSpaceSize);
+dqnModel.copyWeightsTo(targetModel);
+
+const replayBuffer = new ReplayBuffer(10000);
+const batchSize = 32;
+const gamma = 0.95;
+const targetUpdateFreq = 5;
 
 // Training parameters
 const numEpisodes = parseInt(process.argv[2]) || 100;
 console.log(`Number of episodes: ${numEpisodes}`);
 const epsilonDecay = 0.995;
-let epsilon = 1.0; // Exploration-exploitation trade-off
+let epsilon = 1.0;
+const epsilonMin = 0.1;
+let bestReward = -Infinity;
 
 async function train() {
   for (let episode = 0; episode < numEpisodes; episode++) {
@@ -44,6 +55,8 @@ async function train() {
 
     let done = false;
     let totalReward = 0;
+    let steps = 0;
+    let prevDistance = Math.abs(playerWurm.x - aiWurm.x);
 
     while (!done) {
       const observation = getObservation(playerWurm, aiWurm, terrain);
@@ -73,6 +86,11 @@ async function train() {
       game.fire(playerWurm, weaponName, angle, power);
       game.simulateUntilProjectilesResolve();
 
+      const nextObservation = getObservation(playerWurm, aiWurm, terrain);
+      const newDistance = Math.abs(playerWurm.x - aiWurm.x);
+      const distanceDelta = newDistance - prevDistance;
+      prevDistance = newDistance;
+
       // Determine next state and reward
 
       // Apply damage to wurms (already done in the projectile loop)
@@ -83,24 +101,60 @@ async function train() {
       const playerWon = aiWurm.health <= 0 && playerWurm.health > 0;
       const aiWon = playerWurm.health <= 0 && aiWurm.health > 0;
 
-      const reward = calculateReward(playerWurm, aiWurm, hitEnemy, hitSelf, gameEnded, playerWon, aiWon);
+      const reward = calculateReward(playerWurm, aiWurm, hitEnemy, hitSelf, gameEnded, playerWon, aiWon, distanceDelta);
       totalReward += reward;
 
-      // Q-learning update (simplified for now)
-      const targetArray = qValues.arraySync()[0] as number[];
-      targetArray[actionIndex] = reward;
-      const target = tf.tensor2d([targetArray], [1, actionSpaceSize]);
-      await dqnModel.train(observation, target);
+      const experience: Experience = {
+        observation,
+        action: actionIndex,
+        reward,
+        nextObservation,
+        done: gameEnded,
+      };
+      replayBuffer.add(experience);
+
+      if (replayBuffer.size() >= batchSize) {
+        const batch = replayBuffer.sample(batchSize);
+        const obsBatch = batch.map((b) => b.observation);
+        const nextObsBatch = batch.map((b) => b.nextObservation);
+        const qCurr = (dqnModel.predictBatch(obsBatch) as tf.Tensor2D).arraySync() as number[][];
+        const qNext = (targetModel.predictBatch(nextObsBatch) as tf.Tensor2D).arraySync() as number[][];
+        for (let i = 0; i < batch.length; i++) {
+          const { action, reward: r, done: d } = batch[i];
+          if (d) {
+            qCurr[i][action] = r;
+          } else {
+            qCurr[i][action] = r + gamma * Math.max(...qNext[i]);
+          }
+        }
+        const targetTensor = tf.tensor2d(qCurr, [batch.length, actionSpaceSize]);
+        await dqnModel.trainBatch(obsBatch, targetTensor);
+        targetTensor.dispose();
+      }
+
       if (gameEnded) {
         done = true;
       }
+
+      steps++;
     }
 
-    epsilon *= epsilonDecay;
+    epsilon = Math.max(epsilonMin, epsilon * epsilonDecay);
     console.log(`Episode ${episode + 1}: Total Reward = ${totalReward}, Epsilon = ${epsilon.toFixed(2)}`);
+
+    if ((episode + 1) % targetUpdateFreq === 0) {
+      dqnModel.copyWeightsTo(targetModel);
+    }
+
+    if (totalReward > bestReward) {
+      bestReward = totalReward;
+      await fs.mkdir('./src/models', { recursive: true });
+      await dqnModel.save('file://./src/models/dqn-model');
+    }
   }
 
   // Save the trained model to the public directory so it can be served
+  await fs.mkdir('./public/models', { recursive: true });
   await dqnModel.save('file://./public/models/dqn-model');
   console.log('Model trained and saved.');
 }

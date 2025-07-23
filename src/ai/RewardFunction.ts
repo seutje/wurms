@@ -7,7 +7,8 @@ export function calculateReward(
   hitSelf: boolean,
   gameEnded: boolean,
   playerWon: boolean,
-  aiWon: boolean
+  aiWon: boolean,
+  distanceDelta: number
 ): number {
   let reward = 0;
 
@@ -34,8 +35,12 @@ export function calculateReward(
     reward -= 10;
   }
 
-  // Small reward for getting closer to the enemy (this is harder to implement without previous state)
-  // For now, I'll omit this and add it if needed later, as it requires tracking distance over turns.
+  // Encourage getting closer to the enemy
+  if (distanceDelta < 0) {
+    reward += 1;
+  } else if (distanceDelta > 0) {
+    reward -= 1;
+  }
 
   return reward;
 }
