@@ -147,7 +147,7 @@ function startGame() {
             const projectile = projectiles[i];
             projectile.update();
 
-            if (handleProjectileWurmCollision(projectile, playerWurm)) {
+            if (handleProjectileWurmCollision(projectile, playerWurm, terrain)) {
               projectiles.splice(i, 1);
               const indexInCurrentTurn = currentTurnProjectiles.indexOf(projectile);
               if (indexInCurrentTurn > -1) {
@@ -158,7 +158,7 @@ function startGame() {
               continue;
             }
 
-            if (handleProjectileWurmCollision(projectile, aiWurm)) {
+            if (handleProjectileWurmCollision(projectile, aiWurm, terrain)) {
               projectiles.splice(i, 1);
               const indexInCurrentTurn = currentTurnProjectiles.indexOf(projectile);
               if (indexInCurrentTurn > -1) {

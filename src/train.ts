@@ -110,13 +110,13 @@ async function train() {
           const p = projectiles[i];
           p.update();
 
-          if (handleProjectileWurmCollision(p, playerWurm)) {
+          if (handleProjectileWurmCollision(p, playerWurm, terrain)) {
             console.log(`Player Wurm took damage. Health: ${playerWurm.health}`);
             projectiles.splice(i, 1);
             continue;
           }
 
-          if (handleProjectileWurmCollision(p, aiWurm)) {
+          if (handleProjectileWurmCollision(p, aiWurm, terrain)) {
             console.log(`AI Wurm took damage. Health: ${aiWurm.health}`);
             projectiles.splice(i, 1);
             continue;
