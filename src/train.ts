@@ -9,6 +9,7 @@ import { Wurm } from './Wurm.ts';
 import { DQNModel } from './ai/DQNModel.ts';
 import { getObservation } from './ai/ObservationSpace.ts';
 import { WEAPON_CHOICES } from './ai/ActionSpace.ts';
+import { weaponProperties } from './WeaponProperties.ts';
 import { calculateReward } from './ai/RewardFunction.ts';
 
 // Setup JSDOM for Kontra.js headless environment
@@ -74,12 +75,7 @@ async function train() {
       const power = powerBin * 10; // 0-100 in 10 bins
 
       // Simulate action (fire projectile)
-      const weaponProperties: { [key: string]: { radius: number; damage: number; } } = {
-        bazooka: { radius: 5, damage: 30 },
-        grenade: { radius: 5, damage: 40 },
-        mortar: { radius: 5, damage: 35 },
-        nuke: { radius: 10, damage: 100 },
-      };
+      import { weaponProperties } from './WeaponProperties.ts';
       const weaponName = WEAPON_CHOICES[weaponIdx];
       const { radius, damage } = weaponProperties[weaponName];
 

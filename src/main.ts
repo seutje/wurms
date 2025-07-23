@@ -7,6 +7,7 @@ import { Wurm } from './Wurm.ts';
 import { DQNModel } from './ai/DQNModel.ts';
 import { getObservation } from './ai/ObservationSpace.ts';
 import { WEAPON_CHOICES } from './ai/ActionSpace.ts';
+import { weaponProperties } from './WeaponProperties.ts';
 import { SoundManager } from './SoundManager.ts';
 
 // Sound Manager
@@ -25,12 +26,7 @@ const startGameButton = document.getElementById('start-game-button') as HTMLButt
 const playAgainButton = document.getElementById('play-again-button') as HTMLButtonElement;
 
 // Weapon properties (defined globally as they are used in both main game and AI demo)
-const weaponProperties: { [key: string]: { radius: number, damage: number } } = {
-  bazooka: { radius: 5, damage: 30 },
-  grenade: { radius: 5, damage: 40 },
-  mortar: { radius: 5, damage: 35 },
-  nuke: { radius: 10, damage: 100 },
-};
+import { weaponProperties } from './WeaponProperties.ts';
 
 // Main Game Initialization and Loop
 let mainGameLoop: any;
