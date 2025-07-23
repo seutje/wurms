@@ -57,6 +57,7 @@ function startGame() {
   let whoseTurn: 'player' | 'ai' = 'player';
 
   const { playerWurm, aiWurm, terrain, currentTurnProjectiles } = game;
+  playerWurm.barrelAngle = parseFloat((document.getElementById('angle') as HTMLInputElement).value);
 
   // AI Model
   let aiModel: DQNModel | null = null;
@@ -84,6 +85,7 @@ function startGame() {
   // Update angle and power display
   angleInput.addEventListener('input', () => {
     angleValueSpan.textContent = angleInput.value;
+    playerWurm.barrelAngle = parseFloat(angleInput.value);
   });
   powerInput.addEventListener('input', () => {
     powerValueSpan.textContent = powerInput.value;

@@ -44,13 +44,13 @@ describe('Wurm', () => {
     const wurm = new Wurm(0, 20, 100, 'red');
     const terrain = { isColliding: vi.fn().mockReturnValue(false) } as any;
     wurm.update(terrain);
-    expect(wurm.y).toBeGreaterThan(0);
+    expect(wurm.y).toBeGreaterThan(10);
   });
 
   it('does not fall when terrain supports it', () => {
     const wurm = new Wurm(0, 20, 100, 'red');
     const terrain = { isColliding: vi.fn().mockReturnValue(true) } as any;
     wurm.update(terrain);
-    expect(wurm.y).toBe(0);
+    expect(wurm.y).toBe(10);
   });
 });
