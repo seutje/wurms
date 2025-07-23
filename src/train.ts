@@ -83,8 +83,8 @@ async function train() {
       const startX = playerWurm.x;
       const startY = playerWurm.y;
       const radians = angle * Math.PI / 180;
-      const velX = power * Math.cos(radians) * 0.1;
-      const velY = power * Math.sin(radians) * -0.1;
+      const velX = power * Math.cos(radians) * 0.15;
+      const velY = power * Math.sin(radians) * -0.15;
 
       const projectile = new Projectile(
         startX,
