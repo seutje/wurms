@@ -1,4 +1,5 @@
-import kontra from 'kontra';
+// Import kontra from its ESM build for compatibility with both browser and Node
+import kontra from 'kontra/kontra.mjs';
 const { init, GameLoop } = kontra;
 import { Terrain } from './Terrain.js';
 import { Projectile } from './Projectile.js';

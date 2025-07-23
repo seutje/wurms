@@ -28,3 +28,8 @@ declare module 'kontra' {
   export function init(canvas: HTMLCanvasElement): void;
   export function GameLoop(properties: { update: Function; render: Function; }): any;
 }
+
+declare module 'kontra/kontra.mjs' {
+  export * from 'kontra';
+  export { default } from 'kontra';
+}

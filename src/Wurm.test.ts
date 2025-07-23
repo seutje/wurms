@@ -1,25 +1,28 @@
 import { describe, it, expect, vi } from 'vitest';
-import { Wurm } from './Wurm.js';
+import { Wurm } from './Wurm.ts';
 
 // Mock the Sprite class from Kontra.js
-vi.mock('kontra', () => ({
-  Sprite: class MockSprite {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-    color: string;
-    constructor(properties: any) {
-      this.x = properties.x;
-      this.y = properties.y;
-      this.width = properties.width;
-      this.height = properties.height;
-      this.color = properties.color;
-    }
-    // Mock collidesWith method for testing
-    collidesWith(_obj: any) {
-      return false; // Simplified for now
-    }
+// Mock the kontra ESM build used in the source files
+vi.mock('kontra/kontra.mjs', () => ({
+  default: {
+    Sprite: class MockSprite {
+      x: number;
+      y: number;
+      width: number;
+      height: number;
+      color: string;
+      constructor(properties: any) {
+        this.x = properties.x;
+        this.y = properties.y;
+        this.width = properties.width;
+        this.height = properties.height;
+        this.color = properties.color;
+      }
+      // Mock collidesWith method for testing
+      collidesWith(_obj: any) {
+        return false; // Simplified for now
+      }
+    },
   },
 }));
 

@@ -1,4 +1,5 @@
-import kontra from 'kontra';
+// Use the ESM build of kontra so Node can correctly import it during training
+import kontra from 'kontra/kontra.mjs';
 const { GameObject } = kontra;
 
 export class Terrain extends GameObject {
