@@ -1,6 +1,7 @@
 import { JSDOM } from 'jsdom';
 import * as tf from '@tensorflow/tfjs-core';
 import '@tensorflow/tfjs-node'; // Use tfjs-node for headless environment
+import { promises as fs } from 'fs';
 
 import { init } from './kontra.mock.js';
 import { Game } from './Game.js';
@@ -147,11 +148,13 @@ async function train() {
 
     if (totalReward > bestReward) {
       bestReward = totalReward;
+      await fs.mkdir('./src/models', { recursive: true });
       await dqnModel.save('file://./src/models/dqn-model');
     }
   }
 
   // Save the trained model to the public directory so it can be served
+  await fs.mkdir('./public/models', { recursive: true });
   await dqnModel.save('file://./public/models/dqn-model');
   console.log('Model trained and saved.');
 }
