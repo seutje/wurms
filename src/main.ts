@@ -60,6 +60,7 @@ function startGame() {
     GAME_OVER: 'GAME_OVER',
   };
   let currentGameState = GameState.PLANNING;
+  let whoseTurn: 'player' | 'ai' = 'player';
 
   // Wurms
   const playerWurm = new Wurm(100, terrain.getGroundHeight(100), 100, 'blue');
@@ -126,6 +127,7 @@ function startGame() {
       soundManager.playSound('fire');
 
       currentGameState = GameState.EXECUTION;
+      whoseTurn = 'ai';
     }
   });
 
@@ -177,7 +179,11 @@ function startGame() {
               gameOverMessage.textContent = "Player Wins!";
               currentGameState = GameState.GAME_OVER;
             } else {
-              currentGameState = GameState.RESOLUTION;
+              if (whoseTurn === 'ai') {
+                currentGameState = GameState.RESOLUTION;
+              } else {
+                currentGameState = GameState.PLANNING;
+              }
             }
           }
           break;
@@ -210,7 +216,7 @@ function startGame() {
           const { radius: aiRadius, damage: aiDamage } = weaponProperties[aiWeapon];
 
           const aiStartX = aiWurm.x;
-          const aiStartY = aiWurm.y;
+          const aiStartY = aiWurm.y - 10; // Spawn slightly above the wurm
 
           const aiRadians = aiAngle * Math.PI / 180;
           const aiVelX = aiPower * Math.cos(aiRadians) * 0.1;
@@ -228,6 +234,7 @@ function startGame() {
           soundManager.playSound('fire');
 
           currentGameState = GameState.EXECUTION; // AI fires, so back to execution
+          whoseTurn = 'player';
           break;
         case GameState.GAME_OVER:
           gameScreen.style.display = 'none';
