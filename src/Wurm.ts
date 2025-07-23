@@ -15,6 +15,7 @@ export class Wurm extends Sprite {
       height: 20,
     });
     this.health = health;
+    this.dy = 0; // ensure dy is defined for gravity calculations
   }
 
   public draw = () => {
@@ -38,5 +39,16 @@ export class Wurm extends Sprite {
     const distance = Math.sqrt(dx * dx + dy * dy);
 
     return distance < this.width / 2 + projectile.radius;
+  }
+
+  public update = (terrain: any) => {
+    const belowX = Math.floor(this.x + this.width / 2);
+    const belowY = Math.floor(this.y + this.height + 1);
+    if (!terrain.isColliding(belowX, belowY)) {
+      this.dy += 0.2;
+      this.y += this.dy;
+    } else {
+      this.dy = 0;
+    }
   }
 }
