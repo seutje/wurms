@@ -107,12 +107,12 @@ function startGame() {
 
       const { radius, damage, explosionRadius } = weaponProperties[weapon];
 
-      // Fire from player wurm's position
-      const startX = playerWurm.x;
-      const startY = playerWurm.y;
+      // Fire from player wurm's position, offset by projectile radius so it doesn't immediately collide
+      const radians = angle * Math.PI / 180;
+      const startX = playerWurm.x + playerWurm.width / 2 + Math.cos(radians) * radius - radius;
+      const startY = playerWurm.y + playerWurm.height / 2 - Math.sin(radians) * radius - radius;
 
       // Convert angle and power to velocity components
-      const radians = angle * Math.PI / 180;
       const velX = power * Math.cos(radians) * 0.15; // Scale down for reasonable speed
       const velY = power * Math.sin(radians) * -0.15; // Negative for upward movement
 
@@ -249,10 +249,10 @@ function startGame() {
 
           const { radius: aiRadius, damage: aiDamage, explosionRadius: aiExplosionRadius } = weaponProperties[aiWeapon];
 
-          const aiStartX = aiWurm.x;
-          const aiStartY = aiWurm.y - 10; // Spawn slightly above the wurm
-
           const aiRadians = aiAngle * Math.PI / 180;
+          const aiStartX = aiWurm.x + aiWurm.width / 2 + Math.cos(aiRadians) * aiRadius - aiRadius;
+          const aiStartY = aiWurm.y + aiWurm.height / 2 - Math.sin(aiRadians) * aiRadius - aiRadius;
+
           const aiVelX = aiPower * Math.cos(aiRadians) * 0.15;
           const aiVelY = aiPower * Math.sin(aiRadians) * -0.15;
 
@@ -324,10 +324,9 @@ const aiDemoLoop = GameLoop({
 
       const { radius, damage, explosionRadius } = weaponProperties[aiWeapon];
 
-      const startX = aiDemoWurm1.x;
-      const startY = aiDemoWurm1.y;
-
       const radians = aiAngle * Math.PI / 180;
+      const startX = aiDemoWurm1.x + aiDemoWurm1.width / 2 + Math.cos(radians) * radius - radius;
+      const startY = aiDemoWurm1.y + aiDemoWurm1.height / 2 - Math.sin(radians) * radius - radius;
       const velX = aiPower * Math.cos(radians) * 0.15;
       const velY = aiPower * Math.sin(radians) * -0.15;
 
