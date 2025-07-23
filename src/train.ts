@@ -2,7 +2,7 @@ import { JSDOM } from 'jsdom';
 import * as tf from '@tensorflow/tfjs-core';
 import '@tensorflow/tfjs-node'; // Use tfjs-node for headless environment
 
-import { init, GameLoop } from 'kontra';
+import { init } from 'kontra';
 import { Terrain } from './Terrain';
 import { Projectile } from './Projectile';
 import { Wurm } from './Wurm';
@@ -22,7 +22,7 @@ const canvas = dom.window.document.getElementById('game') as HTMLCanvasElement;
 canvas.width = 800;
 canvas.height = 600;
 
-const { context } = init(canvas);
+init(canvas);
 
 // Game setup (similar to main.ts)
 const terrain = new Terrain(canvas.width, canvas.height);
@@ -66,16 +66,23 @@ async function train() {
       }
 
       // Convert actionIndex back to weapon, angle, power
-      const weaponIndex = Math.floor(actionIndex / (10 * 10));
+      const weaponIdx = Math.floor(actionIndex / (10 * 10));
       const angleBin = Math.floor((actionIndex % 100) / 10);
       const powerBin = actionIndex % 10;
 
-      const weapon = WEAPON_CHOICES[weaponIndex];
       const angle = angleBin * 18; // 0-180 in 10 bins
       const power = powerBin * 10; // 0-100 in 10 bins
 
       // Simulate action (fire projectile)
-      const { radius, damage } = { radius: 50, damage: 20 }; // Placeholder, should come from weaponProperties
+      const weaponProperties: { [key: string]: { radius: number; damage: number; } } = {
+        bazooka: { radius: 10, damage: 30 },
+        grenade: { radius: 20, damage: 40 },
+        mortar: { radius: 15, damage: 35 },
+        nuke: { radius: 50, damage: 100 },
+      };
+      const weaponName = WEAPON_CHOICES[weaponIdx];
+      const { radius, damage } = weaponProperties[weaponName];
+
       const startX = playerWurm.x;
       const startY = playerWurm.y;
       const radians = angle * Math.PI / 180;
@@ -107,7 +114,7 @@ async function train() {
             if (playerWurm.collidesWith(p)) {
               playerWurm.takeDamage(p.damage);
             }
-            if (aiWurm.collidesWith(p)) {
+            if (aiWurm.collidesWith(p as any)) {
               aiWurm.takeDamage(p.damage);
             }
           } else if (p.x < 0 || p.x > canvas.width || p.y > canvas.height) {
@@ -119,7 +126,7 @@ async function train() {
       }
 
       // Determine next state and reward
-      const nextObservation = getObservation(playerWurm, aiWurm, terrain);
+      
       const hitEnemy = aiWurm.health < 100; // Simplified check
       const hitSelf = playerWurm.health < 100; // Simplified check
       const gameEnded = playerWurm.health <= 0 || aiWurm.health <= 0;

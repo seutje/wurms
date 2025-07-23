@@ -1,6 +1,8 @@
 import { Sprite } from 'kontra';
 
 export class Wurm extends Sprite {
+  public x: number;
+  public y: number;
   public health: number;
 
   constructor(x: number, y: number, health: number, color: string) {

@@ -1,4 +1,4 @@
-import { init, GameLoop, initPointer, onPointer } from 'kontra';
+import { init, GameLoop, initPointer } from 'kontra';
 import { Terrain } from './Terrain';
 import { Projectile } from './Projectile';
 import { Wurm } from './Wurm';
@@ -31,11 +31,13 @@ const weaponProperties: { [key: string]: { radius: number, damage: number } } = 
 };
 
 // Main Game Initialization and Loop
-let mainGameLoop: GameLoop; // Declare main game loop outside to control start/stop
+let mainGameLoop: any;
 
 function startGame() {
   // Initialize Kontra for the main game canvas
-  const { canvas, context } = init('game');
+  const canvas = document.getElementById('game') as HTMLCanvasElement;
+  const context = canvas.getContext('2d') as CanvasRenderingContext2D;
+  init(canvas);
   initPointer();
 
   const terrain = new Terrain(canvas.width, canvas.height);
@@ -56,8 +58,7 @@ function startGame() {
 
   // AI Model
   let aiModel: DQNModel | null = null;
-  const observationSpaceSize = 6 + (canvas.width / 20); // 6 for wurm data + terrain heights
-  const actionSpaceSize = WEAPON_CHOICES.length * 10 * 10; // weapon * angle_bins * power_bins (simplified)
+  
 
   async function loadModel() {
     try {
@@ -252,7 +253,7 @@ aiDemoCanvas.width = 400;
 aiDemoCanvas.height = 300;
 aiDemoCanvasContainer.appendChild(aiDemoCanvas);
 
-const { context: aiDemoContext } = init(aiDemoCanvas);
+init(aiDemoCanvas);
 
 const aiDemoTerrain = new Terrain(aiDemoCanvas.width, aiDemoCanvas.height);
 const aiDemoWurm1 = new Wurm(50, 50, 100, 'red');

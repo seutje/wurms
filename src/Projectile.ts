@@ -1,6 +1,8 @@
 import { Sprite } from 'kontra';
 
 export class Projectile extends Sprite {
+  public x: number;
+  public y: number;
   public radius: number;
   public damage: number;
 
@@ -13,12 +15,15 @@ export class Projectile extends Sprite {
       width: radius * 2,
       height: radius * 2,
       color: 'red',
-      update: function() {
-        this.dy += 0.1; // gravity
-        this.advance();
-      }
     });
+    this.x = x;
+    this.y = y;
     this.radius = radius;
     this.damage = damage;
+  }
+
+  public update() {
+    this.dy += 0.1; // gravity
+    this.advance();
   }
 }
