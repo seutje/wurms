@@ -207,6 +207,7 @@ const aiDemoTerrain = new Terrain(aiDemoCanvas.width, aiDemoCanvas.height, aiDem
 const aiDemoWurm1 = new Wurm(50, aiDemoTerrain.getGroundHeight(50), 100, 'red');
 const aiDemoWurm2 = new Wurm(aiDemoCanvas.width - 50, aiDemoTerrain.getGroundHeight(aiDemoCanvas.width - 50), 100, 'yellow');
 const aiDemoProjectiles: Projectile[] = [];
+let aiDemoTurn: 'wurm1' | 'wurm2' = 'wurm1';
 
 const aiDemoLoop = GameLoop({
   update: () => {
@@ -222,9 +223,11 @@ const aiDemoLoop = GameLoop({
       const { radius, damage, explosionRadius } = weaponProperties[aiWeapon];
 
       const radians = aiAngle * Math.PI / 180;
-      const startX = aiDemoWurm1.x + aiDemoWurm1.width / 2 + Math.cos(radians) * radius - radius;
-      const startY = aiDemoWurm1.y + aiDemoWurm1.height / 2 - Math.sin(radians) * radius - radius;
-      const velX = aiPower * Math.cos(radians) * 0.15;
+      const shooter = aiDemoTurn === 'wurm1' ? aiDemoWurm1 : aiDemoWurm2;
+      const direction = aiDemoTurn === 'wurm1' ? 1 : -1;
+      const startX = shooter.x + shooter.width / 2 + Math.cos(radians) * radius * direction - radius;
+      const startY = shooter.y + shooter.height / 2 - Math.sin(radians) * radius - radius;
+      const velX = aiPower * Math.cos(radians) * 0.15 * direction;
       const velY = aiPower * Math.sin(radians) * -0.15;
 
       const projectile = new Projectile(
@@ -238,6 +241,8 @@ const aiDemoLoop = GameLoop({
       );
       aiDemoProjectiles.push(projectile);
       soundManager.playSound('fire');
+
+      aiDemoTurn = aiDemoTurn === 'wurm1' ? 'wurm2' : 'wurm1';
     }
 
     for (let i = aiDemoProjectiles.length - 1; i >= 0; i--) {
