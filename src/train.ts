@@ -95,6 +95,7 @@ async function train() {
         damage
       );
       projectiles.push(projectile);
+      console.log(`Projectile created: x=${startX}, y=${startY}, velX=${velX}, velY=${velY}`);
 
       // Simulate game loop update until projectiles resolve
       let allProjectilesResolved = false;
@@ -108,23 +109,29 @@ async function train() {
           p.update();
 
           if (terrain.isColliding(p.x, p.y)) {
-            console.log('Projectile collided with terrain!');
+            console.log(`Projectile collided with terrain at x=${p.x}, y=${p.y}!`);
             terrain.destroy(p.x, p.y, p.radius);
             projectiles.splice(i, 1);
             // Apply damage to wurms
             if (playerWurm.collidesWith(p)) {
               playerWurm.takeDamage(p.damage);
+              console.log(`Player Wurm took damage. Health: ${playerWurm.health}`);
             }
             if (aiWurm.collidesWith(p as any)) {
               aiWurm.takeDamage(p.damage);
+              console.log(`AI Wurm took damage. Health: ${aiWurm.health}`);
             }
           } else if (p.x < 0 || p.x > canvas.width || p.y > canvas.height) {
+            console.log(`Projectile went off-screen at x=${p.x}, y=${p.y}.`);
             projectiles.splice(i, 1);
           } else {
             allProjectilesResolved = false;
           }
         }
         simulationIterations++;
+        if (!allProjectilesResolved && simulationIterations >= MAX_SIMULATION_ITERATIONS) {
+          console.log(`Simulation reached MAX_SIMULATION_ITERATIONS (${MAX_SIMULATION_ITERATIONS}). Projectiles remaining: ${projectiles.length}`);
+        }
       }
 
       // Determine next state and reward
@@ -147,8 +154,7 @@ async function train() {
       targetArray[actionIndex] = reward;
       const target = tf.tensor2d([targetArray], [1, actionSpaceSize]);
       await dqnModel.train(observation, target);
-
-      if (gameEnded) {
+      if (gameEnded || simulationIterations >= MAX_SIMULATION_ITERATIONS || numEpisodes > episode) {
         done = true;
       }
     }
