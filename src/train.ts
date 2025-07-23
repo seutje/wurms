@@ -100,7 +100,7 @@ async function train() {
       // Simulate game loop update until projectiles resolve
       let allProjectilesResolved = false;
       let simulationIterations = 0;
-      const MAX_SIMULATION_ITERATIONS = 1000; // Safeguard to prevent infinite loops
+      const MAX_SIMULATION_ITERATIONS = 5000; // Safeguard to prevent infinite loops
 
       while (!allProjectilesResolved && simulationIterations < MAX_SIMULATION_ITERATIONS) {
         allProjectilesResolved = true;
