@@ -4,12 +4,12 @@ const { init, GameLoop } = kontra;
 import { Terrain } from './Terrain.js';
 import { Projectile } from './Projectile.js';
 import { Wurm } from './Wurm.js';
+import { Game } from './Game.js';
 import { DQNModel } from './ai/DQNModel.js';
 import { getObservation } from './ai/ObservationSpace.js';
 import { WEAPON_CHOICES } from './ai/ActionSpace.js';
 import { weaponProperties } from './WeaponProperties.js';
 import { SoundManager } from './SoundManager.js';
-import { handleProjectileWurmCollision } from "./collision.js";
 
 // Sound Manager
 const soundManager = new SoundManager();
@@ -32,26 +32,19 @@ const playAgainButton = document.getElementById('play-again-button') as HTMLButt
 let mainGameLoop: any;
 
 function startGame() {
-  // Initialize Kontra for the main game canvas
   const canvas = document.getElementById('game') as HTMLCanvasElement;
   const context = canvas.getContext('2d') as CanvasRenderingContext2D;
 
-  // Set initial canvas size
   canvas.width = 800;
   canvas.height = 600;
 
-  init(canvas);
+  const game = new Game(canvas, context);
 
-  const terrain = new Terrain(canvas.width, canvas.height, context);
-
-  // Handle window resize
   window.addEventListener('resize', () => {
     canvas.width = 800;
     canvas.height = 600;
-    init(canvas); // Re-initialize Kontra with new canvas size
+    init(canvas);
   });
-  const projectiles: Projectile[] = [];
-  let currentTurnProjectiles: Projectile[] = [];
 
   // Game States
   const GameState = {
@@ -63,9 +56,7 @@ function startGame() {
   let currentGameState = GameState.PLANNING;
   let whoseTurn: 'player' | 'ai' = 'player';
 
-  // Wurms
-  const playerWurm = new Wurm(100, terrain.getGroundHeight(100), 100, 'blue');
-  const aiWurm = new Wurm(canvas.width - 100, terrain.getGroundHeight(canvas.width - 100), 100, 'green');
+  const { playerWurm, aiWurm, terrain, currentTurnProjectiles } = game;
 
   // AI Model
   let aiModel: DQNModel | null = null;
@@ -105,28 +96,7 @@ function startGame() {
       const power = parseFloat(powerInput.value);
       const weapon = weaponSelect.value;
 
-      const { radius, damage, explosionRadius } = weaponProperties[weapon];
-
-      // Fire from player wurm's position, offset by projectile radius so it doesn't immediately collide
-      const radians = angle * Math.PI / 180;
-      const startX = playerWurm.x + playerWurm.width / 2 + Math.cos(radians) * radius - radius;
-      const startY = playerWurm.y + playerWurm.height / 2 - Math.sin(radians) * radius - radius;
-
-      // Convert angle and power to velocity components
-      const velX = power * Math.cos(radians) * 0.15; // Scale down for reasonable speed
-      const velY = power * Math.sin(radians) * -0.15; // Negative for upward movement
-
-      const projectile = new Projectile(
-        startX,
-        startY,
-        velX,
-        velY,
-        radius,
-        damage,
-        explosionRadius
-      );
-      projectiles.push(projectile);
-      currentTurnProjectiles.push(projectile);
+      game.fire(playerWurm, weapon, angle, power);
       soundManager.playSound('fire');
 
       currentGameState = GameState.EXECUTION;
@@ -143,64 +113,12 @@ function startGame() {
           // Player is choosing actions
           break;
         case GameState.EXECUTION:
-          // Projectiles are in flight
-          
-          for (let i = projectiles.length - 1; i >= 0; i--) {
-            const projectile = projectiles[i];
-            projectile.update();
-
-            if (handleProjectileWurmCollision(projectile, playerWurm, terrain)) {
-              projectiles.splice(i, 1);
-              const indexInCurrentTurn = currentTurnProjectiles.indexOf(projectile);
-              if (indexInCurrentTurn > -1) {
-                currentTurnProjectiles.splice(indexInCurrentTurn, 1);
-              }
-              soundManager.playSound('explosion');
-              soundManager.playSound('damage');
-              continue;
-            }
-
-            if (handleProjectileWurmCollision(projectile, aiWurm, terrain)) {
-              projectiles.splice(i, 1);
-              const indexInCurrentTurn = currentTurnProjectiles.indexOf(projectile);
-              if (indexInCurrentTurn > -1) {
-                currentTurnProjectiles.splice(indexInCurrentTurn, 1);
-              }
-              soundManager.playSound('explosion');
-              soundManager.playSound('damage');
-              continue;
-            }
-
-            // Check collision with terrain
-            if (terrain.isColliding(projectile.x + projectile.radius, projectile.y + projectile.radius)) {
-              terrain.destroy(projectile.x + projectile.radius, projectile.y + projectile.radius, projectile.explosionRadius);
-              projectiles.splice(i, 1);
-              // Remove from currentTurnProjectiles if it was one of them
-              const indexInCurrentTurn = currentTurnProjectiles.indexOf(projectile);
-              if (indexInCurrentTurn > -1) {
-                currentTurnProjectiles.splice(indexInCurrentTurn, 1);
-              }
-              soundManager.playSound('explosion');
-              // For now, a hit on terrain also means damage to nearby wurms
-              // This will be refined later with explosion radius and damage falloff
-              if (playerWurm.collidesWith(projectile)) {
-                playerWurm.takeDamage(projectile.damage);
-                soundManager.playSound('damage');
-              }
-              if (aiWurm.collidesWith(projectile)) {
-                aiWurm.takeDamage(projectile.damage);
-                soundManager.playSound('damage');
-              }
-            } else if (projectile.x + (projectile.radius * 2) < 0 || projectile.x > canvas.width || projectile.y + (projectile.radius * 2) < 0 || projectile.y > canvas.height) {
-              console.log(`Projectile removed: Off-screen at x: ${projectile.x}, y: ${projectile.y}, radius: ${projectile.radius}`);
-              // Remove projectiles that go off-screen
-              projectiles.splice(i, 1);
-              // Remove from currentTurnProjectiles if it was one of them
-              const indexInCurrentTurn = currentTurnProjectiles.indexOf(projectile);
-              if (indexInCurrentTurn > -1) {
-                currentTurnProjectiles.splice(indexInCurrentTurn, 1);
-              }
-            }
+          const prevPlayer = playerWurm.health;
+          const prevAi = aiWurm.health;
+          game.update();
+          if (playerWurm.health < prevPlayer || aiWurm.health < prevAi) {
+            soundManager.playSound('explosion');
+            soundManager.playSound('damage');
           }
 
           if (currentTurnProjectiles.length === 0) { // Only transition when current turn's projectiles are resolved
@@ -249,26 +167,7 @@ function startGame() {
             aiWeapon = aiWeaponOptions[Math.floor(Math.random() * aiWeaponOptions.length)];
           }
 
-          const { radius: aiRadius, damage: aiDamage, explosionRadius: aiExplosionRadius } = weaponProperties[aiWeapon];
-
-          const aiRadians = aiAngle * Math.PI / 180;
-          const aiStartX = aiWurm.x + aiWurm.width / 2 + Math.cos(aiRadians) * aiRadius - aiRadius;
-          const aiStartY = aiWurm.y + aiWurm.height / 2 - Math.sin(aiRadians) * aiRadius - aiRadius;
-
-          const aiVelX = aiPower * Math.cos(aiRadians) * 0.15;
-          const aiVelY = aiPower * Math.sin(aiRadians) * -0.15;
-
-          const aiProjectile = new Projectile(
-            aiStartX,
-            aiStartY,
-            aiVelX,
-            aiVelY,
-            aiRadius,
-            aiDamage,
-            aiExplosionRadius
-          );
-          projectiles.push(aiProjectile);
-          currentTurnProjectiles.push(aiProjectile);
+          game.fire(aiWurm, aiWeapon, aiAngle, aiPower);
           soundManager.playSound('fire');
 
           currentGameState = GameState.EXECUTION; // AI fires, so back to execution
@@ -282,13 +181,7 @@ function startGame() {
       }
     },
     render: () => {
-      terrain.draw();
-
-      playerWurm.draw();
-      aiWurm.draw();
-      for (const projectile of projectiles) {
-        projectile.render();
-      }
+      game.draw();
 
       // Display health (for debugging/testing)
       context.fillStyle = 'white';
