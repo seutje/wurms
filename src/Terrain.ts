@@ -11,6 +11,22 @@ export class Terrain extends GameObject {
 
   
 
+  public draw = () => {
+    this.context.fillStyle = 'brown';
+    this.context.fillRect(0, 0, this.width, this.height);
+
+    this.context.fillStyle = 'green';
+    this.context.beginPath();
+    this.context.moveTo(0, this.getGroundHeight(0));
+    for (let x = 0; x < this.width; x++) {
+      this.context.lineTo(x, this.getGroundHeight(x));
+    }
+    this.context.lineTo(this.width, this.height);
+    this.context.lineTo(0, this.height);
+    this.context.closePath();
+    this.context.fill();
+  };
+
   public destroy = (x: number, y: number, radius: number) => {
     this.context.globalCompositeOperation = 'destination-out';
     this.context.beginPath();

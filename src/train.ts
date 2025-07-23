@@ -26,7 +26,7 @@ canvas.height = 600;
 init(canvas);
 
 // Game setup (similar to main.ts)
-const terrain = new Terrain(canvas.width, canvas.height, canvas.getContext('2d')!);
+let terrain = new Terrain(canvas.width, canvas.height, canvas.getContext('2d')!);
 const playerWurm = new Wurm(100, 100, 100, 'blue');
 const aiWurm = new Wurm(canvas.width - 100, 100, 100, 'green');
 const projectiles: Projectile[] = [];
@@ -38,6 +38,7 @@ const dqnModel = new DQNModel([observationSpaceSize], actionSpaceSize);
 
 // Training parameters
 const numEpisodes = parseInt(process.argv[2]) || 100;
+console.log(`Number of episodes: ${numEpisodes}`);
 const epsilonDecay = 0.995;
 let epsilon = 1.0; // Exploration-exploitation trade-off
 
@@ -48,7 +49,8 @@ async function train() {
     aiWurm.health = 100;
     projectiles.length = 0;
     // Regenerate terrain for variety
-    // terrain = new Terrain(canvas.width, canvas.height);
+    terrain = new Terrain(canvas.width, canvas.height, canvas.getContext('2d')!); 
+    terrain.draw();
 
     let done = false;
     let totalReward = 0;
@@ -96,13 +98,17 @@ async function train() {
 
       // Simulate game loop update until projectiles resolve
       let allProjectilesResolved = false;
-      while (!allProjectilesResolved) {
+      let simulationIterations = 0;
+      const MAX_SIMULATION_ITERATIONS = 1000; // Safeguard to prevent infinite loops
+
+      while (!allProjectilesResolved && simulationIterations < MAX_SIMULATION_ITERATIONS) {
         allProjectilesResolved = true;
         for (let i = projectiles.length - 1; i >= 0; i--) {
           const p = projectiles[i];
           p.update();
 
           if (terrain.isColliding(p.x, p.y)) {
+            console.log('Projectile collided with terrain!');
             terrain.destroy(p.x, p.y, p.radius);
             projectiles.splice(i, 1);
             // Apply damage to wurms
@@ -118,12 +124,17 @@ async function train() {
             allProjectilesResolved = false;
           }
         }
+        simulationIterations++;
       }
 
       // Determine next state and reward
-      
-      const hitEnemy = aiWurm.health < 100; // Simplified check
-      const hitSelf = playerWurm.health < 100; // Simplified check
+      const prevPlayerHealth = playerWurm.health;
+      const prevAiHealth = aiWurm.health;
+
+      // Apply damage to wurms (already done in the projectile loop)
+
+      const hitEnemy = aiWurm.health < prevAiHealth;
+      const hitSelf = playerWurm.health < prevPlayerHealth;
       const gameEnded = playerWurm.health <= 0 || aiWurm.health <= 0;
       const playerWon = aiWurm.health <= 0 && playerWurm.health > 0;
       const aiWon = playerWurm.health <= 0 && aiWurm.health > 0;

@@ -32,12 +32,11 @@ export class Wurm extends Sprite {
   }
 
   public collidesWith = (projectile: any): boolean => {
-    // Simple bounding box collision detection
-    return (
-      this.x < projectile.x + projectile.width &&
-      this.x + this.width > projectile.x &&
-      this.y < projectile.y + projectile.height &&
-      this.y + this.height > projectile.y
-    );
+    // Circular collision detection
+    const dx = this.x + this.width / 2 - projectile.x;
+    const dy = this.y + this.height / 2 - projectile.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+
+    return distance < this.width / 2 + projectile.radius;
   }
 }
