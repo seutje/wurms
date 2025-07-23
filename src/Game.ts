@@ -64,11 +64,13 @@ export class Game {
       const projectile = this.projectiles[i];
       projectile.update();
       if (handleProjectileWurmCollision(projectile, this.playerWurm, this.terrain)) {
+        console.log('AI Player hit!');
         this.projectiles.splice(i, 1);
         this.removeFromCurrent(projectile);
         continue;
       }
       if (handleProjectileWurmCollision(projectile, this.aiWurm, this.terrain)) {
+        console.log('AI Wurm hit!');
         this.projectiles.splice(i, 1);
         this.removeFromCurrent(projectile);
         continue;
