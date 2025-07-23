@@ -39,9 +39,21 @@ function startGame() {
   // Initialize Kontra for the main game canvas
   const canvas = document.getElementById('game') as HTMLCanvasElement;
   const context = canvas.getContext('2d') as CanvasRenderingContext2D;
+
+  // Set initial canvas size
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
   init(canvas);
 
   const terrain = new Terrain(canvas.width, canvas.height);
+
+  // Handle window resize
+  window.addEventListener('resize', () => {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    init(canvas); // Re-initialize Kontra with new canvas size
+  });
   const projectiles: Projectile[] = [];
 
   // Game States
