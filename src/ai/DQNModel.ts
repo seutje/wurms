@@ -12,6 +12,11 @@ export class DQNModel {
     this.model = this.buildModel();
   }
 
+  public copyWeightsTo(target: DQNModel) {
+    const weights = this.model.getWeights();
+    target.model.setWeights(weights.map((w) => w.clone()));
+  }
+
   private buildModel(): tf.LayersModel {
     const model = tf.sequential();
     model.add(tf.layers.dense({ units: 64, activation: 'relu', inputShape: this.inputShape }));
@@ -34,13 +39,39 @@ export class DQNModel {
     return tf.tensor2d([flatObservation], [1, this.inputShape[0]]);
   }
 
+  private encodeBatch(observations: Observation[]): tf.Tensor2D {
+    const data = observations.map((obs) => [
+      obs.playerWurmX,
+      obs.playerWurmY,
+      obs.playerWurmHealth,
+      obs.aiWurmX,
+      obs.aiWurmY,
+      obs.aiWurmHealth,
+      ...obs.terrainHeights,
+    ]);
+    return tf.tensor2d(data, [observations.length, this.inputShape[0]]);
+  }
+
   public predict(observation: Observation): tf.Tensor<tf.Rank> {
     return this.model.predict(this.encode(observation)) as tf.Tensor<tf.Rank>;
+  }
+
+  public predictBatch(observations: Observation[]): tf.Tensor {
+    return this.model.predict(this.encodeBatch(observations)) as tf.Tensor;
   }
 
   public train(observation: Observation, target: tf.Tensor<tf.Rank>) {
     const inputTensor = this.encode(observation);
     return this.model.fit(inputTensor, target);
+  }
+
+  public trainBatch(observations: Observation[], targets: tf.Tensor) {
+    const inputTensor = this.encodeBatch(observations);
+    return this.model.fit(inputTensor, targets);
+  }
+
+  public getOutputSize() {
+    return this.outputSize;
   }
 
   public save(path: string) {
