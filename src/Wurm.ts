@@ -31,6 +31,7 @@ export class Wurm extends Sprite {
     const length = this.width / 2;
     const radians = this.barrelAngle * Math.PI / 180;
     this.context.strokeStyle = 'white';
+    this.context.lineWidth = 3;
     this.context.beginPath();
     this.context.moveTo(centerX, centerY);
     this.context.lineTo(centerX + Math.cos(radians) * length, centerY - Math.sin(radians) * length);
