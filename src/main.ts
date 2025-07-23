@@ -7,6 +7,13 @@ import { getObservation } from './ai/ObservationSpace';
 import { WEAPON_CHOICES } from './ai/ActionSpace';
 import { SoundManager } from './SoundManager';
 
+// Sound Manager
+const soundManager = new SoundManager();
+soundManager.loadSound('fire', './sounds/fire.wav');
+soundManager.loadSound('explosion', './sounds/explosion.wav');
+soundManager.loadSound('damage', './sounds/damage.wav');
+soundManager.loadSound('click', './sounds/click.wav');
+
 // Get screen elements
 const startScreen = document.getElementById('start-screen') as HTMLElement;
 const gameScreen = document.getElementById('game-screen') as HTMLElement;
@@ -80,37 +87,37 @@ function startGame() {
   });
 
   fireButton.addEventListener('click', () => {
-  if (currentGameState === GameState.PLANNING) {
-    soundManager.playSound('click');
-    const angle = parseFloat(angleInput.value);
-    const power = parseFloat(powerInput.value);
-    const weapon = weaponSelect.value;
+    if (currentGameState === GameState.PLANNING) {
+      soundManager.playSound('click');
+      const angle = parseFloat(angleInput.value);
+      const power = parseFloat(powerInput.value);
+      const weapon = weaponSelect.value;
 
-    const { radius, damage } = weaponProperties[weapon];
+      const { radius, damage } = weaponProperties[weapon];
 
-    // Fire from player wurm's position
-    const startX = playerWurm.x;
-    const startY = playerWurm.y;
+      // Fire from player wurm's position
+      const startX = playerWurm.x;
+      const startY = playerWurm.y;
 
-    // Convert angle and power to velocity components
-    const radians = angle * Math.PI / 180;
-    const velX = power * Math.cos(radians) * 0.1; // Scale down for reasonable speed
-    const velY = power * Math.sin(radians) * -0.1; // Negative for upward movement
+      // Convert angle and power to velocity components
+      const radians = angle * Math.PI / 180;
+      const velX = power * Math.cos(radians) * 0.1; // Scale down for reasonable speed
+      const velY = power * Math.sin(radians) * -0.1; // Negative for upward movement
 
-    const projectile = new Projectile(
-      startX,
-      startY,
-      velX,
-      velY,
-      radius,
-      damage
-    );
-    projectiles.push(projectile);
-    soundManager.playSound('fire');
+      const projectile = new Projectile(
+        startX,
+        startY,
+        velX,
+        velY,
+        radius,
+        damage
+      );
+      projectiles.push(projectile);
+      soundManager.playSound('fire');
 
-    currentGameState = GameState.EXECUTION;
-  }
-});
+      currentGameState = GameState.EXECUTION;
+    }
+  });
 
   mainGameLoop = GameLoop({
     update: () => {
@@ -208,6 +215,7 @@ function startGame() {
             aiDamage
           );
           projectiles.push(aiProjectile);
+          soundManager.playSound('fire');
 
           currentGameState = GameState.EXECUTION; // AI fires, so back to execution
           break;
@@ -320,5 +328,6 @@ playAgainButton.addEventListener('click', () => {
 });
 
 aiDemoLoop.start(); // Start AI demo loop initially
+
 
 
