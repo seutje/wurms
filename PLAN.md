@@ -147,10 +147,10 @@ The reward function is crucial for training. It will guide the AI's learning pro
 *   [x] Implement model saving and loading.
 
 ### Milestone 4: UI/UX and Polish (1 week)
-*   [ ] Design and implement the Start Screen with the AI vs AI demo.
-*   [ ] Design and implement the Game Over Screen.
-*   [ ] Add sound effects using the Web Audio API.
-*   [ ] Refine UI elements and overall presentation.
+*   [x] Design and implement the Start Screen with the AI vs AI demo.
+*   [x] Design and implement the Game Over Screen.
+*   [x] Add sound effects using the Web Audio API.
+*   [x] Refine UI elements and overall presentation.
 
 ### Milestone 5: Testing and Deployment (1 week)
 *   [ ] Thoroughly test the game for bugs.
