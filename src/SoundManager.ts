@@ -2,7 +2,7 @@ export class SoundManager {
   private audioContext: AudioContext;
   private sounds: { [key: string]: AudioBuffer } = {};
   private unlocked = false;
-  private masterVolume = 0.25;
+  private masterVolume = 0.015;
 
   constructor() {
     this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
@@ -56,7 +56,7 @@ export class SoundManager {
     const buffer = this.audioContext.createBuffer(1, length, sampleRate);
     const data = buffer.getChannelData(0);
     for (let i = 0; i < length; i++) {
-      data[i] = Math.random() * 2 - 1;
+      data[i] = Math.random() * 0.5 - 1;
     }
     return buffer;
   }

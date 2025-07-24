@@ -16,7 +16,7 @@ import { Explosion } from './Explosion.js';
 const soundManager = new SoundManager();
 soundManager.createTone('fire', 440, 0.2);
 soundManager.createNoise('explosion', 0.6);
-soundManager.createSquareTone('damage', 880, 0.2);
+soundManager.createSquareTone('damage', 440, 0.2);
 soundManager.createTone('click', 660, 0.05);
 
 // Get screen elements
