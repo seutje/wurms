@@ -2,6 +2,7 @@ export class SoundManager {
   private audioContext: AudioContext;
   private sounds: { [key: string]: AudioBuffer } = {};
   private unlocked = false;
+  private masterVolume = 0.25;
 
   constructor() {
     this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
@@ -37,6 +38,18 @@ export class SoundManager {
     return buffer;
   }
 
+  private createSquareBuffer(frequency: number, duration: number): AudioBuffer {
+    const sampleRate = this.audioContext.sampleRate;
+    const length = sampleRate * duration;
+    const buffer = this.audioContext.createBuffer(1, length, sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < length; i++) {
+      const value = Math.sin((2 * Math.PI * frequency * i) / sampleRate);
+      data[i] = value >= 0 ? 1 : -1;
+    }
+    return buffer;
+  }
+
   private createNoiseBuffer(duration: number): AudioBuffer {
     const sampleRate = this.audioContext.sampleRate;
     const length = sampleRate * duration;
@@ -52,6 +65,10 @@ export class SoundManager {
     this.sounds[name] = this.createToneBuffer(frequency, duration);
   }
 
+  public createSquareTone(name: string, frequency: number, duration: number) {
+    this.sounds[name] = this.createSquareBuffer(frequency, duration);
+  }
+
   public createNoise(name: string, duration: number) {
     this.sounds[name] = this.createNoiseBuffer(duration);
   }
@@ -64,7 +81,7 @@ export class SoundManager {
       source.buffer = sound;
 
       const gainNode = this.audioContext.createGain();
-      gainNode.gain.value = volume;
+      gainNode.gain.value = volume * this.masterVolume;
       source.connect(gainNode);
       gainNode.connect(this.audioContext.destination);
 
