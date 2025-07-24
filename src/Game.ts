@@ -62,6 +62,40 @@ export class Game {
     }
   }
 
+  private applyExplosionDamage(
+    x: number,
+    y: number,
+    radius: number,
+    damage: number
+  ) {
+    const checkDamage = (wurm: Wurm) => {
+      const wx = wurm.x + wurm.width / 2;
+      const wy = wurm.y + wurm.height / 2;
+      const dist = Math.hypot(x - wx, y - wy);
+      if (dist <= radius) {
+        wurm.takeDamage(damage);
+      }
+    };
+    checkDamage(this.playerWurm);
+    checkDamage(this.aiWurm);
+  }
+
+  private explodeGrenade(index: number, grenade: Grenade) {
+    this.terrain.destroy(
+      grenade.x + grenade.radius,
+      grenade.y + grenade.radius,
+      grenade.explosionRadius
+    );
+    this.applyExplosionDamage(
+      grenade.x + grenade.radius,
+      grenade.y + grenade.radius,
+      grenade.explosionRadius,
+      grenade.damage
+    );
+    this.projectiles.splice(index, 1);
+    this.removeFromCurrent(grenade);
+  }
+
   public update() {
     this.playerWurm.update(this.terrain);
     this.aiWurm.update(this.terrain);
@@ -92,16 +126,8 @@ export class Game {
           grenade.dy = -grenade.dy * 0.5;
           grenade.dx *= 0.7;
         }
-        if (typeof grenade.isFuseExpired === 'function' && grenade.isFuseExpired()) {
-          this.terrain.destroy(grenade.x + grenade.radius, grenade.y + grenade.radius, grenade.explosionRadius);
-          if (hitPlayer) {
-            this.playerWurm.takeDamage(grenade.damage);
-          }
-          if (hitAi) {
-            this.aiWurm.takeDamage(grenade.damage);
-          }
-          this.projectiles.splice(i, 1);
-          this.removeFromCurrent(grenade);
+        if (grenade.isFuseExpired()) {
+          this.explodeGrenade(i, grenade);
           continue;
         }
         if (

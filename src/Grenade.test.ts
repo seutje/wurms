@@ -54,9 +54,11 @@ describe('Grenade behavior', () => {
     game.projectiles.push(grenade);
     game.currentTurnProjectiles.push(grenade);
     vi.spyOn(game.terrain, 'isColliding').mockReturnValue(false);
+    const destroySpy = vi.spyOn(game.terrain, 'destroy');
 
     game.update();
 
     expect(game.projectiles.length).toBe(0);
+    expect(destroySpy).toHaveBeenCalled();
   });
 });
