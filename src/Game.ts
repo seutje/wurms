@@ -94,7 +94,9 @@ export class Game {
           new Explosion(
             projectile.x + projectile.radius,
             projectile.y + projectile.radius,
-            projectile.explosionRadius
+            projectile.explosionRadius,
+            projectile.explosionRadius >= 50 ? 60 : 30,
+            projectile.explosionRadius >= 50 ? 'nuke' : 'normal'
           )
         );
         this.projectiles.splice(i, 1);
@@ -107,7 +109,9 @@ export class Game {
           new Explosion(
             projectile.x + projectile.radius,
             projectile.y + projectile.radius,
-            projectile.explosionRadius
+            projectile.explosionRadius,
+            projectile.explosionRadius >= 50 ? 60 : 30,
+            projectile.explosionRadius >= 50 ? 'nuke' : 'normal'
           )
         );
         this.projectiles.splice(i, 1);
@@ -149,7 +153,9 @@ export class Game {
           new Explosion(
             projectile.x + projectile.radius,
             projectile.y + projectile.radius,
-            projectile.explosionRadius
+            projectile.explosionRadius,
+            projectile.explosionRadius >= 50 ? 60 : 30,
+            projectile.explosionRadius >= 50 ? 'nuke' : 'normal'
           )
         );
         this.projectiles.splice(i, 1);

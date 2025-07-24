@@ -272,11 +272,15 @@ const aiDemoLoop = GameLoop({
       if (aiDemoTerrain.isColliding(projectile.x + projectile.radius, projectile.y + projectile.radius)) {
         console.log(`AI Demo Projectile removed: Terrain collision at x: ${projectile.x}, y: ${projectile.y}, radius: ${projectile.radius}`);
         aiDemoTerrain.destroy(projectile.x + projectile.radius, projectile.y + projectile.radius, projectile.explosionRadius);
-        aiDemoExplosions.push(new Explosion(
-          projectile.x + projectile.radius,
-          projectile.y + projectile.radius,
-          projectile.explosionRadius
-        ));
+        aiDemoExplosions.push(
+          new Explosion(
+            projectile.x + projectile.radius,
+            projectile.y + projectile.radius,
+            projectile.explosionRadius,
+            projectile.explosionRadius >= 50 ? 60 : 30,
+            projectile.explosionRadius >= 50 ? 'nuke' : 'normal'
+          )
+        );
         aiDemoProjectiles.splice(i, 1);
         soundManager.playSound('explosion');
       } else if (projectile.x + (projectile.radius * 2) < 0 || projectile.x > aiDemoCanvas.width || projectile.y + (projectile.radius * 2) < 0 || projectile.y > aiDemoCanvas.height) {
