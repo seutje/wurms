@@ -42,7 +42,7 @@ The Wurms project is a web-based game, likely a Worms-like artillery game, built
     *   For new features or bug fixes, write corresponding tests in a `.test.ts` file alongside the code it tests (e.g., `Wurm.ts` has `Wurm.test.ts`).
     *   Ensure tests cover edge cases and common scenarios.
     *   Tests should be deterministic and independent.
-*   **Code Quality**: Before submitting any changes, ensure all existing tests pass and new tests are added where appropriate.
+*   **Code Quality**: Before submitting any changes, ensure all existing tests pass and new tests are added where appropriate, additionally, make sure `npm run train 1` executes without errors.
 
 ## 5. Version Control (Git)
 
@@ -59,6 +59,10 @@ The Wurms project is a web-based game, likely a Worms-like artillery game, built
 *   **Install Dependencies**:
     ```bash
     npm install
+    ```
+*   **Run Training**:
+    ```bash
+    npm run train x (x = episodes, defaults to 100)
     ```
 *   **Start Development Server**:
     ```bash
