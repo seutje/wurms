@@ -151,7 +151,17 @@ export class Game {
           projectile.dy = -projectile.dy;
           projectile.dx *= 0.7;
         } else {
-          this.terrain.destroy(projectile.x + projectile.radius, projectile.y + projectile.radius, projectile.explosionRadius);
+          this.terrain.destroy(
+            projectile.x + projectile.radius,
+            projectile.y + projectile.radius,
+            projectile.explosionRadius
+          );
+          this.explosions.push(
+            new Explosion(
+              projectile.x + projectile.radius,
+              projectile.y + projectile.radius,
+              projectile.explosionRadius
+            )
           this.applyExplosionDamage(
             projectile.x + projectile.radius,
             projectile.y + projectile.radius,
