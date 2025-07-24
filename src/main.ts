@@ -58,7 +58,8 @@ function startGame() {
   let whoseTurn: 'player' | 'ai' = 'player';
 
   const { playerWurm, aiWurm, terrain, currentTurnProjectiles } = game;
-  playerWurm.barrelAngle = parseFloat((document.getElementById('angle') as HTMLInputElement).value);
+  const initialAngleInput = document.getElementById('angle') as HTMLInputElement;
+  playerWurm.barrelAngle = 180 - parseFloat(initialAngleInput.value);
 
   // AI Model
   let aiModel: DQNModel | null = null;
@@ -83,10 +84,13 @@ function startGame() {
   const powerValueSpan = document.getElementById('power-value') as HTMLSpanElement;
   const fireButton = document.getElementById('fire') as HTMLButtonElement;
 
+  angleValueSpan.textContent = (180 - parseFloat(angleInput.value)).toString();
+
   // Update angle and power display
   angleInput.addEventListener('input', () => {
-    angleValueSpan.textContent = angleInput.value;
-    playerWurm.barrelAngle = parseFloat(angleInput.value);
+    const angle = 180 - parseFloat(angleInput.value);
+    angleValueSpan.textContent = angle.toString();
+    playerWurm.barrelAngle = angle;
   });
   powerInput.addEventListener('input', () => {
     powerValueSpan.textContent = powerInput.value;
@@ -95,7 +99,7 @@ function startGame() {
   fireButton.addEventListener('click', () => {
     if (currentGameState === GameState.PLANNING) {
       soundManager.playSound('click');
-      const angle = parseFloat(angleInput.value);
+      const angle = 180 - parseFloat(angleInput.value);
       const power = parseFloat(powerInput.value);
       const weapon = weaponSelect.value;
 
