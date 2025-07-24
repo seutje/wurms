@@ -269,12 +269,19 @@ export class Game {
           );
           projectile.x = prevX;
           projectile.y = prevY;
-          if (horizontalCollision && !verticalCollision) {
+          if (verticalCollision) {
+            const center = projectile.x + projectile.radius;
+            const slope =
+              this.terrain.getGroundHeight(center + 1) -
+              this.terrain.getGroundHeight(center - 1);
+            projectile.y =
+              this.terrain.getGroundHeight(center) - projectile.radius * 2;
+            projectile.dy = 0;
+            projectile.dx += slope * 0.1;
+            projectile.dx *= 0.95;
+          } else if (horizontalCollision) {
             projectile.dx = -projectile.dx * 0.5;
             projectile.dy *= 0.7;
-          } else if (verticalCollision && !horizontalCollision) {
-            projectile.dy = -projectile.dy * 0.5;
-            projectile.dx *= 0.7;
           } else if (Math.abs(projectile.dx) > Math.abs(projectile.dy)) {
             projectile.dx = -projectile.dx * 0.5;
             projectile.dy *= 0.7;

@@ -7,8 +7,8 @@ vi.mock('kontra/kontra.mjs', async () => {
   return { default: { Sprite: mod.MockSprite, GameObject: mod.MockGameObject, init: mod.init } };
 });
 
-describe('Grenade fuse behavior', () => {
-  it('bounces then explodes when fuse runs out', () => {
+describe('Grenade rolling', () => {
+  it('rolls down a slope after hitting the ground', () => {
     const canvas = document.createElement('canvas');
     canvas.width = 800;
     canvas.height = 600;
@@ -19,13 +19,13 @@ describe('Grenade fuse behavior', () => {
     game.projectiles.push(projectile);
     game.currentTurnProjectiles.push(projectile);
 
-    vi.spyOn(game.terrain, 'isColliding').mockReturnValue(true);
-    game.update();
-    expect(projectile.dy).toBe(0);
-    expect(game.projectiles.length).toBe(1);
+    const ground = (x: number) => 0.5 * x + 50;
+    vi.spyOn(game.terrain, 'getGroundHeight').mockImplementation(ground);
+    vi.spyOn(game.terrain, 'isColliding').mockImplementation((x: number, y: number) => y >= ground(x));
 
-    (game.terrain.isColliding as any).mockReturnValue(false);
     game.update();
-    expect(game.projectiles.length).toBe(0);
+
+    expect(projectile.dy).toBe(0);
+    expect(projectile.dx).toBeGreaterThan(0);
   });
 });
