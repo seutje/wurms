@@ -23,7 +23,7 @@ describe('Projectile terrain wall behavior', () => {
 
     game.update();
 
-    expect(projectile.dx).toBe(-1);
+    expect(projectile.dx).toBe(-0.6);
     expect(projectile.dy).toBe(0);
     expect(game.projectiles.length).toBe(1);
   });

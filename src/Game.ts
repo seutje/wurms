@@ -280,10 +280,10 @@ export class Game {
             projectile.dx += slope * 0.1;
             projectile.dx *= 0.95;
           } else if (horizontalCollision) {
-            projectile.dx = -projectile.dx * 0.5;
+            projectile.dx = -projectile.dx * 0.3;
             projectile.dy *= 0.7;
           } else if (Math.abs(projectile.dx) > Math.abs(projectile.dy)) {
-            projectile.dx = -projectile.dx * 0.5;
+            projectile.dx = -projectile.dx * 0.3;
             projectile.dy *= 0.7;
           } else {
             projectile.dy = -projectile.dy * 0.5;
