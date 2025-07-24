@@ -78,7 +78,7 @@ export class Game {
         projectile.dx = -projectile.dx;
       }
 
-      if (projectile instanceof Grenade) {
+      if (projectile.isGrenade) {
         const hitPlayer = this.playerWurm.collidesWith(projectile);
         const hitAi = this.aiWurm.collidesWith(projectile);
         const hitTerrain = this.terrain.isColliding(
