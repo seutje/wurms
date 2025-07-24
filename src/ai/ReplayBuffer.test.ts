@@ -2,10 +2,8 @@ import { describe, it, expect } from 'vitest';
 import { ReplayBuffer, Experience } from './ReplayBuffer.js';
 
 const dummyObs = {
-  playerWurmX: 0,
-  playerWurmY: 0,
-  aiWurmX: 0,
-  aiWurmY: 0,
+  angleToTarget: 0,
+  distanceToTarget: 0,
 };
 
 describe('ReplayBuffer', () => {

@@ -36,7 +36,7 @@ function getDummyPlayerShot() {
 }
 
 // DQN Model setup
-const observationSpaceSize = 4;
+const observationSpaceSize = 2;
 const actionSpaceSize = WEAPON_CHOICES.length * 10 * 10;
 const dqnModel = new DQNModel([observationSpaceSize], actionSpaceSize);
 const targetModel = new DQNModel([observationSpaceSize], actionSpaceSize);

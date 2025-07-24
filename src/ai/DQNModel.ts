@@ -32,20 +32,16 @@ export class DQNModel {
 
   private encode(observation: Observation): tf.Tensor2D {
     const flatObservation = [
-      observation.playerWurmX,
-      observation.playerWurmY,
-      observation.aiWurmX,
-      observation.aiWurmY,
+      observation.angleToTarget,
+      observation.distanceToTarget,
     ];
     return tf.tensor2d([flatObservation], [1, this.inputShape[0]]);
   }
 
   private encodeBatch(observations: Observation[]): tf.Tensor2D {
     const data = observations.map((obs) => [
-      obs.playerWurmX,
-      obs.playerWurmY,
-      obs.aiWurmX,
-      obs.aiWurmY,
+      obs.angleToTarget,
+      obs.distanceToTarget,
     ]);
     return tf.tensor2d(data, [observations.length, this.inputShape[0]]);
   }
