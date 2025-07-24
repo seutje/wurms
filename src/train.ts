@@ -159,6 +159,7 @@ async function train() {
           } else {
             qCurr[i][action] = r + gamma * Math.max(...qNext[i]);
           }
+          qCurr[i][action] = Math.max(-100, Math.min(100, qCurr[i][action]));
         }
         const targetTensor = tf.tensor2d(qCurr, [batch.length, actionSpaceSize]);
         const loss = dqnModel.trainBatch(obsBatch, targetTensor);
