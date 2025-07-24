@@ -30,6 +30,30 @@ export class Game {
     }
     return [playerX, aiX] as const;
   }
+
+  private circleIntersectsRect(
+    cx: number,
+    cy: number,
+    radius: number,
+    rectX: number,
+    rectY: number,
+    rectW: number,
+    rectH: number
+  ): boolean {
+    const distX = Math.abs(cx - (rectX + rectW / 2));
+    const distY = Math.abs(cy - (rectY + rectH / 2));
+
+    if (distX > rectW / 2 + radius) return false;
+    if (distY > rectH / 2 + radius) return false;
+
+    if (distX <= rectW / 2) return true;
+    if (distY <= rectH / 2) return true;
+
+    const dx = distX - rectW / 2;
+    const dy = distY - rectH / 2;
+    return dx * dx + dy * dy <= radius * radius;
+  }
+
   private applyExplosionDamage(
     x: number,
     y: number,
@@ -37,10 +61,17 @@ export class Game {
     damage: number
   ) {
     const damageWurm = (wurm: Wurm) => {
-      const centerX = wurm.x + wurm.width / 2;
-      const centerY = wurm.y + wurm.height / 2;
-      const distance = Math.hypot(centerX - x, centerY - y);
-      if (distance <= radius) {
+      if (
+        this.circleIntersectsRect(
+          x,
+          y,
+          radius,
+          wurm.x,
+          wurm.y,
+          wurm.width,
+          wurm.height
+        )
+      ) {
         wurm.takeDamage(damage);
       }
     };
