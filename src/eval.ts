@@ -21,7 +21,7 @@ canvas.height = 600;
 init(canvas);
 
 const game = new Game(canvas, canvas.getContext('2d')!);
-const { playerWurm, aiWurm, terrain } = game;
+const { playerWurm, aiWurm } = game;
 
 function getDummyPlayerShot() {
   const weapon = WEAPON_CHOICES[Math.floor(Math.random() * WEAPON_CHOICES.length)];
@@ -41,7 +41,7 @@ async function evaluate(numEpisodes = 1) {
     let prevDistance = Math.abs(aiWurm.x - playerWurm.x);
 
     while (!done) {
-      const observation = getObservation(aiWurm, playerWurm, terrain);
+      const observation = getObservation(aiWurm, playerWurm);
       const qValues = model.predict(observation) as tf.Tensor;
       const argMax = tf.argMax(qValues);
       const actionIndex = argMax.dataSync()[0];

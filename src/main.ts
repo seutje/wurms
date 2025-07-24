@@ -1,7 +1,6 @@
 // Import kontra from its ESM build for compatibility with both browser and Node
 import kontra from 'kontra/kontra.mjs';
 const { init, GameLoop } = kontra;
-import { Terrain } from './Terrain.js';
 import { Wurm } from './Wurm.js';
 import { Game } from './Game.js';
 import { DQNModel } from './ai/DQNModel.js';
@@ -29,7 +28,6 @@ const playAgainButton = document.getElementById('play-again-button') as HTMLButt
 function getAiAction(
   shooter: Wurm,
   target: Wurm,
-  terrain: Terrain,
   model: DQNModel | null
 ) {
   let aiAngle: number;
@@ -37,7 +35,7 @@ function getAiAction(
   let aiWeapon: string;
 
   if (model) {
-    const observation = getObservation(shooter, target, terrain);
+    const observation = getObservation(shooter, target);
     const prediction = model.predict(observation);
     const argMax = prediction.argMax(-1);
     const actionIndex = argMax.dataSync()[0];
@@ -173,7 +171,6 @@ function startGame(seed?: number, playerIsAI = false, showUI = true) {
             const { aiWeapon, aiAngle, aiPower } = getAiAction(
               playerWurm,
               aiWurm,
-              terrain,
               aiModel
             );
             game.fire(playerWurm, aiWeapon, aiAngle, aiPower);
@@ -212,7 +209,6 @@ function startGame(seed?: number, playerIsAI = false, showUI = true) {
           const { aiWeapon, aiAngle, aiPower } = getAiAction(
             aiWurm,
             playerWurm,
-            terrain,
             aiModel
           );
           game.fire(aiWurm, aiWeapon, aiAngle, aiPower);

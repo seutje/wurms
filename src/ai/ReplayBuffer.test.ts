@@ -6,7 +6,6 @@ const dummyObs = {
   playerWurmY: 0,
   aiWurmX: 0,
   aiWurmY: 0,
-  terrainHeights: [0],
 };
 
 describe('ReplayBuffer', () => {
