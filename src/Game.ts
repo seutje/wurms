@@ -73,6 +73,8 @@ export class Game {
     this.aiWurm.update(this.terrain);
     for (let i = this.projectiles.length - 1; i >= 0; i--) {
       const projectile = this.projectiles[i];
+      const prevX = projectile.x;
+      const prevY = projectile.y;
       projectile.update();
 
       if (projectile.x < 0) {
@@ -98,8 +100,10 @@ export class Game {
 
       if (this.terrain.isColliding(projectile.x + projectile.radius, projectile.y + projectile.radius)) {
         if (projectile.fuse > 0) {
-          projectile.y -= 1;
-          projectile.dy = -projectile.dy;
+          projectile.x = prevX;
+          projectile.y = prevY;
+          projectile.dy = -projectile.dy * 0.5;
+          projectile.dx *= 0.7;
         } else {
           this.terrain.destroy(projectile.x + projectile.radius, projectile.y + projectile.radius, projectile.explosionRadius);
           this.projectiles.splice(i, 1);
