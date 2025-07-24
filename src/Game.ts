@@ -40,7 +40,7 @@ export class Game {
     init(canvas);
     this.terrain = new Terrain(canvas.width, canvas.height, context);
     this.playerWurm = new Wurm(100, this.terrain.getGroundHeight(100), 100, 'blue');
-    this.aiWurm = new Wurm(canvas.width - 100, this.terrain.getGroundHeight(canvas.width - 100), 100, 'green');
+    this.aiWurm = new Wurm(canvas.width - 100, this.terrain.getGroundHeight(canvas.width - 100), 100, 'red');
   }
 
   public reset() {
@@ -148,7 +148,7 @@ export class Game {
         if (projectile.fuse > 0) {
           projectile.x = prevX;
           projectile.y = prevY;
-          projectile.dy = -projectile.dy;
+          projectile.dy *= -0.5;
           projectile.dx *= 0.7;
         } else {
           this.terrain.destroy(
@@ -162,6 +162,7 @@ export class Game {
               projectile.y + projectile.radius,
               projectile.explosionRadius
             )
+          );
           this.applyExplosionDamage(
             projectile.x + projectile.radius,
             projectile.y + projectile.radius,
