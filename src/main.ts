@@ -235,7 +235,7 @@ const aiDemoLoop = GameLoop({
       const aiWeaponOptions = Object.keys(weaponProperties);
       const aiWeapon = aiWeaponOptions[Math.floor(Math.random() * aiWeaponOptions.length)];
 
-      const { radius, damage, explosionRadius } = weaponProperties[aiWeapon];
+      const { radius, damage, explosionRadius, fuse } = weaponProperties[aiWeapon];
 
       const radians = aiAngle * Math.PI / 180;
       const shooter = aiDemoTurn === 'wurm1' ? aiDemoWurm1 : aiDemoWurm2;
@@ -253,7 +253,8 @@ const aiDemoLoop = GameLoop({
         velY,
         radius,
         damage,
-        explosionRadius
+        explosionRadius,
+        fuse
       );
       aiDemoProjectiles.push(projectile);
       soundManager.playSound('fire');

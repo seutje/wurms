@@ -25,7 +25,7 @@ vi.mock('kontra/kontra.mjs', () => ({
 describe('handleProjectileWurmCollision', () => {
   it('damages wurm and destroys terrain when projectile collides', () => {
     const wurm = new Wurm(0, 10, 100, 'blue');
-    const projectile = new Projectile(0, 0, 0, 0, 5, 20, 10);
+    const projectile = new Projectile(0, 0, 0, 0, 5, 20, 10, 0);
     const terrain = { destroy: vi.fn() } as any;
     const result = handleProjectileWurmCollision(projectile, wurm, terrain);
     expect(result).toBe(true);
@@ -35,7 +35,7 @@ describe('handleProjectileWurmCollision', () => {
 
   it('returns false when no collision occurs', () => {
     const wurm = new Wurm(100, 100, 100, 'blue');
-    const projectile = new Projectile(0, 0, 0, 0, 5, 20, 10);
+    const projectile = new Projectile(0, 0, 0, 0, 5, 20, 10, 0);
     const terrain = { destroy: vi.fn() } as any;
     const result = handleProjectileWurmCollision(projectile, wurm, terrain);
     expect(result).toBe(false);

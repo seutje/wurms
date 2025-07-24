@@ -15,7 +15,7 @@ describe('Projectile top boundary behavior', () => {
     const ctx = canvas.getContext('2d')!;
     const game = new Game(canvas, ctx);
 
-    const projectile = new Projectile(200, -6, 0, 0, 5, 0, 0);
+    const projectile = new Projectile(200, -6, 0, 0, 5, 0, 0, 0);
     game.projectiles.push(projectile);
     game.currentTurnProjectiles.push(projectile);
 
