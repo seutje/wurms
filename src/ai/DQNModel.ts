@@ -5,10 +5,12 @@ export class DQNModel {
   private model: tf.LayersModel;
   private inputShape: number[];
   private outputSize: number;
+  private optimizer: tf.Optimizer;
 
   constructor(inputShape: number[], outputSize: number) {
     this.inputShape = inputShape;
     this.outputSize = outputSize;
+    this.optimizer = tf.train.adam(0.0005);
     this.model = this.buildModel();
   }
 
@@ -22,7 +24,7 @@ export class DQNModel {
     model.add(tf.layers.dense({ units: 64, activation: 'relu', inputShape: this.inputShape }));
     model.add(tf.layers.dense({ units: 64, activation: 'relu' }));
     model.add(tf.layers.dense({ units: this.outputSize })); // Output for Q-values
-    model.compile({ optimizer: tf.train.adam(), loss: 'meanSquaredError' });
+    model.compile({ optimizer: this.optimizer, loss: 'meanSquaredError' });
     return model;
   }
 
@@ -65,9 +67,23 @@ export class DQNModel {
     return this.model.fit(inputTensor, target);
   }
 
-  public trainBatch(observations: Observation[], targets: tf.Tensor) {
+  public trainBatch(observations: Observation[], targets: tf.Tensor2D): number {
     const inputTensor = this.encodeBatch(observations);
-    return this.model.fit(inputTensor, targets);
+    const { value, grads } = this.optimizer.computeGradients(() => {
+      const preds = this.model.predict(inputTensor) as tf.Tensor2D;
+      return tf.losses.meanSquaredError(targets, preds).mean() as tf.Scalar;
+    });
+    const clipped: Record<string, tf.Tensor> = {};
+    for (const key in grads) {
+      clipped[key] = tf.clipByValue(grads[key], -1, 1);
+    }
+    this.optimizer.applyGradients(clipped);
+    const loss = value.dataSync()[0];
+    value.dispose();
+    Object.values(grads).forEach((g) => g.dispose());
+    Object.values(clipped).forEach((g) => g.dispose());
+    inputTensor.dispose();
+    return loss;
   }
 
   public getOutputSize() {

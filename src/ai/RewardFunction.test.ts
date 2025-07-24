@@ -27,6 +27,6 @@ describe('calculateReward', () => {
     const ai = new Wurm(0, 0, 100, 'blue');
 
     const reward = calculateReward(player, ai, false, false, false, false, 0);
-    expect(reward).toBe(-10);
+    expect(reward).toBe(-1);
   });
 });

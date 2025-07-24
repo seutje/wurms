@@ -41,5 +41,5 @@ export function calculateReward(
     reward -= 1;
   }
 
-  return reward;
+  return reward * 0.1;
 }
