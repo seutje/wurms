@@ -31,7 +31,7 @@ export function calculateReward(
   }
 
   // Small negative reward for missing a shot (if no hit occurred)
-  if (!hitEnemy && !hitSelf && gameEnded) { // Assuming gameEnded implies a turn ended without a hit
+  if (!hitEnemy && !hitSelf) {
     reward -= 10;
   }
 
