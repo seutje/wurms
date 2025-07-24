@@ -39,7 +39,10 @@ function getAiAction(
   if (model) {
     const observation = getObservation(shooter, target, terrain);
     const prediction = model.predict(observation);
-    const actionIndex = prediction.argMax(-1).dataSync()[0];
+    const argMax = prediction.argMax(-1);
+    const actionIndex = argMax.dataSync()[0];
+    argMax.dispose();
+    prediction.dispose();
 
     const weaponIndex = Math.floor(actionIndex / (10 * 10));
     const angleBin = Math.floor((actionIndex % 100) / 10);
