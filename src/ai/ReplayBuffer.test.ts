@@ -4,10 +4,8 @@ import { ReplayBuffer, Experience } from './ReplayBuffer.js';
 const dummyObs = {
   playerWurmX: 0,
   playerWurmY: 0,
-  playerWurmHealth: 100,
   aiWurmX: 0,
   aiWurmY: 0,
-  aiWurmHealth: 100,
   terrainHeights: [0],
 };
 

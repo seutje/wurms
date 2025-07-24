@@ -34,10 +34,8 @@ export class DQNModel {
     const flatObservation = [
       observation.playerWurmX,
       observation.playerWurmY,
-      observation.playerWurmHealth,
       observation.aiWurmX,
       observation.aiWurmY,
-      observation.aiWurmHealth,
       ...observation.terrainHeights,
     ];
     return tf.tensor2d([flatObservation], [1, this.inputShape[0]]);
@@ -47,10 +45,8 @@ export class DQNModel {
     const data = observations.map((obs) => [
       obs.playerWurmX,
       obs.playerWurmY,
-      obs.playerWurmHealth,
       obs.aiWurmX,
       obs.aiWurmY,
-      obs.aiWurmHealth,
       ...obs.terrainHeights,
     ]);
     return tf.tensor2d(data, [observations.length, this.inputShape[0]]);
