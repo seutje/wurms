@@ -73,6 +73,11 @@ async function train() {
     while (!done) {
       const observation = getObservation(aiWurm, playerWurm, terrain);
       const qValues = dqnModel.predict(observation);
+      const qArr = (qValues.arraySync() as number[][])[0];
+      const stepQMin = Math.min(...qArr);
+      const stepQMax = Math.max(...qArr);
+      episodeQMin = Math.min(episodeQMin, stepQMin);
+      episodeQMax = Math.max(episodeQMax, stepQMax);
       let actionIndex: number;
 
       if (Math.random() < epsilon) {
@@ -154,6 +159,7 @@ async function train() {
           } else {
             qCurr[i][action] = r + gamma * Math.max(...qNext[i]);
           }
+          qCurr[i][action] = Math.max(-100, Math.min(100, qCurr[i][action]));
         }
         const targetTensor = tf.tensor2d(qCurr, [batch.length, actionSpaceSize]);
         const loss = dqnModel.trainBatch(obsBatch, targetTensor);
