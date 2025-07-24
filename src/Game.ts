@@ -5,6 +5,7 @@ import { Projectile } from './Projectile.js';
 import { Wurm } from './Wurm.js';
 import { weaponProperties } from './WeaponProperties.js';
 import { handleProjectileWurmCollision } from './collision.js';
+import { Explosion } from './Explosion.js';
 
 export class Game {
   public terrain: Terrain;
@@ -12,6 +13,7 @@ export class Game {
   public aiWurm: Wurm;
   public projectiles: Projectile[] = [];
   public currentTurnProjectiles: Projectile[] = [];
+  public explosions: Explosion[] = [];
   private canvas: HTMLCanvasElement;
   private context: CanvasRenderingContext2D;
 
@@ -34,6 +36,7 @@ export class Game {
     this.aiWurm.health = 100;
     this.projectiles = [];
     this.currentTurnProjectiles = [];
+    this.explosions = [];
   }
 
   public fire(wurm: Wurm, weapon: string, angle: number, power: number) {
@@ -87,12 +90,26 @@ export class Game {
 
       if (projectile.fuse <= 0 && handleProjectileWurmCollision(projectile, this.playerWurm, this.terrain)) {
         console.log('Player hit!');
+        this.explosions.push(
+          new Explosion(
+            projectile.x + projectile.radius,
+            projectile.y + projectile.radius,
+            projectile.explosionRadius
+          )
+        );
         this.projectiles.splice(i, 1);
         this.removeFromCurrent(projectile);
         continue;
       }
       if (projectile.fuse <= 0 && handleProjectileWurmCollision(projectile, this.aiWurm, this.terrain)) {
         console.log('AI Wurm hit!');
+        this.explosions.push(
+          new Explosion(
+            projectile.x + projectile.radius,
+            projectile.y + projectile.radius,
+            projectile.explosionRadius
+          )
+        );
         this.projectiles.splice(i, 1);
         this.removeFromCurrent(projectile);
         continue;
@@ -128,6 +145,13 @@ export class Game {
 
       if (projectile.initialFuse > 0 && projectile.fuse <= 0) {
         this.terrain.destroy(projectile.x + projectile.radius, projectile.y + projectile.radius, projectile.explosionRadius);
+        this.explosions.push(
+          new Explosion(
+            projectile.x + projectile.radius,
+            projectile.y + projectile.radius,
+            projectile.explosionRadius
+          )
+        );
         this.projectiles.splice(i, 1);
         this.removeFromCurrent(projectile);
         if (this.playerWurm.collidesWith(projectile)) {
@@ -141,6 +165,14 @@ export class Game {
 
       if (projectile.fuse > 0) {
         projectile.fuse--;
+      }
+    }
+
+    for (let i = this.explosions.length - 1; i >= 0; i--) {
+      const explosion = this.explosions[i];
+      explosion.update();
+      if (explosion.isDone()) {
+        this.explosions.splice(i, 1);
       }
     }
   }
@@ -159,6 +191,9 @@ export class Game {
     this.aiWurm.draw();
     for (const projectile of this.projectiles) {
       projectile.render();
+    }
+    for (const explosion of this.explosions) {
+      explosion.draw(this.context);
     }
   }
 }
