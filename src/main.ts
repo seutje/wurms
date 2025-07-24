@@ -32,14 +32,14 @@ const playAgainButton = document.getElementById('play-again-button') as HTMLButt
 // Main Game Initialization and Loop
 let mainGameLoop: any;
 
-function startGame() {
+function startGame(seed?: number) {
   const canvas = document.getElementById('game') as HTMLCanvasElement;
   const context = canvas.getContext('2d') as CanvasRenderingContext2D;
 
   canvas.width = 800;
   canvas.height = 600;
 
-  const game = new Game(canvas, context);
+  const game = new Game(canvas, context, seed);
 
   window.addEventListener('resize', () => {
     canvas.width = 800;
@@ -334,7 +334,9 @@ startGameButton.addEventListener('click', () => {
   gameScreen.style.display = 'block';
   aiDemoLoop.stop(); // Stop AI demo when game starts
   aiDemoContext.clearRect(0, 0, aiDemoCanvas.width, aiDemoCanvas.height);
-  startGame(); // Start main game loop
+  const param = new URLSearchParams(window.location.search).get('seed');
+  const seed = param ? parseInt(param, 10) : undefined;
+  startGame(seed); // Start main game loop
 });
 
 // Play Again Button
