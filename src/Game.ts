@@ -126,7 +126,11 @@ export class Game {
           grenade.dy = -grenade.dy * 0.5;
           grenade.dx *= 0.7;
         }
-        if (grenade.isFuseExpired()) {
+        const fuseExpired =
+          typeof (grenade as any).isFuseExpired === 'function'
+            ? (grenade as Grenade).isFuseExpired()
+            : grenade.fuse <= 0;
+        if (fuseExpired) {
           this.explodeGrenade(i, grenade);
           continue;
         }

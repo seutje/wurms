@@ -61,4 +61,25 @@ describe('Grenade behavior', () => {
     expect(game.projectiles.length).toBe(0);
     expect(destroySpy).toHaveBeenCalled();
   });
+
+  it('handles missing isFuseExpired method', () => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 800;
+    canvas.height = 600;
+    const ctx = canvas.getContext('2d')!;
+    const game = new Game(canvas, ctx);
+
+    const grenade = new Grenade(100, 100, 0, 0, 5, 10, 20, 1);
+    // @ts-expect-error deliberately remove method for test
+    (grenade as any).isFuseExpired = undefined;
+    game.projectiles.push(grenade);
+    game.currentTurnProjectiles.push(grenade);
+    vi.spyOn(game.terrain, 'isColliding').mockReturnValue(false);
+    const destroySpy = vi.spyOn(game.terrain, 'destroy');
+
+    game.update();
+
+    expect(game.projectiles.length).toBe(0);
+    expect(destroySpy).toHaveBeenCalled();
+  });
 });
