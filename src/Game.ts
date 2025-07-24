@@ -16,6 +16,20 @@ export class Game {
   public explosions: Explosion[] = [];
   private canvas: HTMLCanvasElement;
   private context: CanvasRenderingContext2D;
+
+  private getSpawnPositions() {
+    const edgeBuffer = 20;
+    const minDistance = 150;
+    const range = this.canvas.width - edgeBuffer * 2;
+    let playerX = edgeBuffer + Math.random() * range;
+    let aiX = edgeBuffer + Math.random() * range;
+    let attempts = 0;
+    while (Math.abs(playerX - aiX) < minDistance && attempts < 100) {
+      aiX = edgeBuffer + Math.random() * range;
+      attempts++;
+    }
+    return [playerX, aiX] as const;
+  }
   private applyExplosionDamage(
     x: number,
     y: number,
@@ -39,17 +53,19 @@ export class Game {
     this.context = context;
     init(canvas);
     this.terrain = new Terrain(canvas.width, canvas.height, context);
-    this.playerWurm = new Wurm(100, this.terrain.getGroundHeight(100), 100, 'blue');
-    this.aiWurm = new Wurm(canvas.width - 100, this.terrain.getGroundHeight(canvas.width - 100), 100, 'green');
+    const [playerX, aiX] = this.getSpawnPositions();
+    this.playerWurm = new Wurm(playerX, this.terrain.getGroundHeight(playerX), 100, 'blue');
+    this.aiWurm = new Wurm(aiX, this.terrain.getGroundHeight(aiX), 100, 'green');
   }
 
   public reset() {
     this.terrain = new Terrain(this.canvas.width, this.canvas.height, this.context);
-    this.playerWurm.x = 100;
-    this.playerWurm.y = this.terrain.getGroundHeight(100) - this.playerWurm.height;
+    const [playerX, aiX] = this.getSpawnPositions();
+    this.playerWurm.x = playerX;
+    this.playerWurm.y = this.terrain.getGroundHeight(playerX) - this.playerWurm.height;
     this.playerWurm.health = 100;
-    this.aiWurm.x = this.canvas.width - 100;
-    this.aiWurm.y = this.terrain.getGroundHeight(this.canvas.width - 100) - this.aiWurm.height;
+    this.aiWurm.x = aiX;
+    this.aiWurm.y = this.terrain.getGroundHeight(aiX) - this.aiWurm.height;
     this.aiWurm.health = 100;
     this.projectiles = [];
     this.currentTurnProjectiles = [];
@@ -148,7 +164,7 @@ export class Game {
         if (projectile.fuse > 0) {
           projectile.x = prevX;
           projectile.y = prevY;
-          projectile.dy = -projectile.dy;
+          projectile.dy = -projectile.dy * 0.5;
           projectile.dx *= 0.7;
         } else {
           this.terrain.destroy(
@@ -162,6 +178,7 @@ export class Game {
               projectile.y + projectile.radius,
               projectile.explosionRadius
             )
+          );
           this.applyExplosionDamage(
             projectile.x + projectile.radius,
             projectile.y + projectile.radius,
