@@ -26,6 +26,23 @@ describe('Grenade behavior', () => {
     expect(game.playerWurm.health).toBe(100);
   });
 
+  it('bounces on terrain impact', () => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 800;
+    canvas.height = 600;
+    const ctx = canvas.getContext('2d')!;
+    const game = new Game(canvas, ctx);
+
+    const grenade = new Grenade(100, 100, 0, 2, 5, 10, 20, 2);
+    game.projectiles.push(grenade);
+    game.currentTurnProjectiles.push(grenade);
+    vi.spyOn(game.terrain, 'isColliding').mockReturnValue(true);
+
+    game.update();
+
+    expect(grenade.dy).toBe(-1);
+  });
+
   it('explodes after fuse expires', () => {
     const canvas = document.createElement('canvas');
     canvas.width = 800;

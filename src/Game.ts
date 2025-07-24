@@ -67,6 +67,8 @@ export class Game {
     this.aiWurm.update(this.terrain);
     for (let i = this.projectiles.length - 1; i >= 0; i--) {
       const projectile = this.projectiles[i];
+      const prevX = projectile.x;
+      const prevY = projectile.y;
       projectile.update();
       if (projectile.x < 0) {
         projectile.x = 0;
@@ -79,8 +81,13 @@ export class Game {
       if (projectile instanceof Grenade) {
         const hitPlayer = this.playerWurm.collidesWith(projectile);
         const hitAi = this.aiWurm.collidesWith(projectile);
-        const hitTerrain = this.terrain.isColliding(projectile.x + projectile.radius, projectile.y + projectile.radius);
+        const hitTerrain = this.terrain.isColliding(
+          projectile.x + projectile.radius,
+          projectile.y + projectile.radius
+        );
         if (hitPlayer || hitAi || hitTerrain) {
+          projectile.x = prevX;
+          projectile.y = prevY;
           projectile.dy = -projectile.dy * 0.5;
           projectile.dx *= 0.7;
         }
