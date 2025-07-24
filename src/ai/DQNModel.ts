@@ -71,16 +71,26 @@ export class DQNModel {
     const inputTensor = this.encodeBatch(observations);
     const { value, grads } = this.optimizer.computeGradients(() => {
       const preds = this.model.predict(inputTensor) as tf.Tensor2D;
-      return tf.losses.meanSquaredError(targets, preds).mean() as tf.Scalar;
+      return tf.losses.huberLoss(targets, preds).mean() as tf.Scalar;
     });
+
+    const gradValues = Object.values(grads);
+    const globalNorm = tf.tidy(() => {
+      const squares = gradValues.map((g) => tf.sum(tf.square(g)));
+      return tf.sqrt(tf.addN(squares));
+    });
+    const normValue = globalNorm.dataSync()[0];
+    const scale = normValue > 1 ? 1 / normValue : 1;
     const clipped: Record<string, tf.Tensor> = {};
     for (const key in grads) {
-      clipped[key] = tf.clipByValue(grads[key], -1, 1);
+      clipped[key] = grads[key].mul(scale);
     }
+
     this.optimizer.applyGradients(clipped);
     const loss = value.dataSync()[0];
     value.dispose();
-    Object.values(grads).forEach((g) => g.dispose());
+    globalNorm.dispose();
+    gradValues.forEach((g) => g.dispose());
     Object.values(clipped).forEach((g) => g.dispose());
     inputTensor.dispose();
     return loss;
