@@ -16,6 +16,7 @@ export class Game {
   public explosions: Explosion[] = [];
   private canvas: HTMLCanvasElement;
   private context: CanvasRenderingContext2D;
+  private readonly spawnOffset = 20;
 
   private getSpawnPositions() {
     const edgeBuffer = 20;
@@ -92,8 +93,18 @@ export class Game {
     this.mapSeed = seed;
     this.terrain = new Terrain(canvas.width, canvas.height, context, seed);
     const [playerX, aiX] = this.getSpawnPositions();
-    this.playerWurm = new Wurm(playerX, this.terrain.getGroundHeight(playerX), 100, 'blue');
-    this.aiWurm = new Wurm(aiX, this.terrain.getGroundHeight(aiX), 100, 'red');
+    this.playerWurm = new Wurm(
+      playerX,
+      this.terrain.getGroundHeight(playerX) - this.spawnOffset,
+      100,
+      'blue'
+    );
+    this.aiWurm = new Wurm(
+      aiX,
+      this.terrain.getGroundHeight(aiX) - this.spawnOffset,
+      100,
+      'red'
+    );
   }
 
   public reset(seed?: number) {
@@ -106,10 +117,12 @@ export class Game {
     );
     const [playerX, aiX] = this.getSpawnPositions();
     this.playerWurm.x = playerX;
-    this.playerWurm.y = this.terrain.getGroundHeight(playerX) - this.playerWurm.height;
+    this.playerWurm.y =
+      this.terrain.getGroundHeight(playerX) - this.spawnOffset - this.playerWurm.height;
     this.playerWurm.health = 100;
     this.aiWurm.x = aiX;
-    this.aiWurm.y = this.terrain.getGroundHeight(aiX) - this.aiWurm.height;
+    this.aiWurm.y =
+      this.terrain.getGroundHeight(aiX) - this.spawnOffset - this.aiWurm.height;
     this.aiWurm.health = 100;
     this.projectiles = [];
     this.currentTurnProjectiles = [];
