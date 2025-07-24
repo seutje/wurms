@@ -65,6 +65,11 @@ async function train() {
     let steps = 0;
     let prevDistance = Math.abs(aiWurm.x - playerWurm.x);
 
+    let episodeQMin = Infinity;
+    let episodeQMax = -Infinity;
+    let episodeLossSum = 0;
+    let episodeLossCount = 0;
+
     while (!done) {
       const observation = getObservation(aiWurm, playerWurm, terrain);
       const qValues = dqnModel.predict(observation);
@@ -137,7 +142,8 @@ async function train() {
         const flatQ = qCurr.flat();
         const qMax = Math.max(...flatQ);
         const qMin = Math.min(...flatQ);
-        console.log(`Q range: ${qMin.toFixed(4)} to ${qMax.toFixed(4)}`);
+        episodeQMin = Math.min(episodeQMin, qMin);
+        episodeQMax = Math.max(episodeQMax, qMax);
         const qNextTensor = targetModel.predictBatch(nextObsBatch) as tf.Tensor2D;
         const qNext = qNextTensor.arraySync() as number[][];
         qNextTensor.dispose();
@@ -151,7 +157,8 @@ async function train() {
         }
         const targetTensor = tf.tensor2d(qCurr, [batch.length, actionSpaceSize]);
         const loss = dqnModel.trainBatch(obsBatch, targetTensor);
-        console.log(`Batch loss: ${loss.toFixed(6)}`);
+        episodeLossSum += loss;
+        episodeLossCount++;
         targetTensor.dispose();
       }
 
@@ -163,7 +170,15 @@ async function train() {
     }
 
     epsilon = Math.max(epsilonMin, epsilon * epsilonDecay);
-    console.log(`Episode ${episode + 1}: Total Reward = ${totalReward}, Epsilon = ${epsilon.toFixed(2)}`);
+    const qRangeStr = isFinite(episodeQMin) && isFinite(episodeQMax)
+      ? `${episodeQMin.toFixed(4)} to ${episodeQMax.toFixed(4)}`
+      : 'N/A';
+    const avgLossStr = episodeLossCount > 0
+      ? (episodeLossSum / episodeLossCount).toFixed(6)
+      : 'N/A';
+    console.log(
+      `Episode ${episode + 1}: Total Reward = ${totalReward}, Epsilon = ${epsilon.toFixed(2)}, Q range = ${qRangeStr}, Avg Loss = ${avgLossStr}`
+    );
 
     if ((episode + 1) % targetUpdateFreq === 0) {
       dqnModel.copyWeightsTo(targetModel);
