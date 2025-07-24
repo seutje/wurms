@@ -154,6 +154,7 @@ function startGame(seed?: number, playerIsAI = false, showUI = true) {
   }
 
   mainGameLoop = GameLoop({
+    blur: true,
     update: () => {
       playerWurm.update(terrain);
       aiWurm.update(terrain);
