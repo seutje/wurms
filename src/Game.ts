@@ -202,9 +202,8 @@ export class Game {
         projectile.x = this.canvas.width - projectile.radius * 2;
         projectile.dx = -projectile.dx;
       }
-
+      // Player hit
       if (projectile.fuse <= 0 && handleProjectileWurmCollision(projectile, this.playerWurm, this.terrain)) {
-        console.log('Player hit!');
         this.explosions.push(
           new Explosion(
             projectile.x + projectile.radius,
@@ -223,8 +222,8 @@ export class Game {
         this.removeFromCurrent(projectile);
         continue;
       }
+      // AI Wurm hit
       if (projectile.fuse <= 0 && handleProjectileWurmCollision(projectile, this.aiWurm, this.terrain)) {
-        console.log('AI Wurm hit!');
         this.explosions.push(
           new Explosion(
             projectile.x + projectile.radius,
