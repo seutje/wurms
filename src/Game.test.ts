@@ -41,4 +41,29 @@ describe('Game projectile spawning', () => {
     game.update();
     expect(game.playerWurm.health).toBe(80);
   });
+
+  it('damages wurm when explosion overlaps but center is outside', () => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 800;
+    canvas.height = 600;
+    const ctx = canvas.getContext('2d')!;
+    const game = new Game(canvas, ctx);
+
+    const explosionRadius = 5;
+    const projectile = new Projectile(
+      game.playerWurm.x - explosionRadius - 2,
+      game.playerWurm.y,
+      0,
+      0,
+      explosionRadius,
+      20,
+      explosionRadius,
+      0
+    );
+    game.projectiles.push(projectile);
+    game.currentTurnProjectiles.push(projectile);
+    vi.spyOn(game.terrain, 'isColliding').mockReturnValue(true);
+    game.update();
+    expect(game.playerWurm.health).toBe(80);
+  });
 });
