@@ -75,8 +75,11 @@ async function train() {
         actionIndex = Math.floor(Math.random() * actionSpaceSize);
       } else {
         // Exploit: choose best action from model prediction
-        actionIndex = tf.argMax(qValues).dataSync()[0];
+        const argMax = tf.argMax(qValues);
+        actionIndex = argMax.dataSync()[0];
+        argMax.dispose();
       }
+      qValues.dispose();
 
       // Convert actionIndex back to weapon, angle, power
       const weaponIdx = Math.floor(actionIndex / (10 * 10));
@@ -128,8 +131,12 @@ async function train() {
         const batch = replayBuffer.sample(batchSize);
         const obsBatch = batch.map((b) => b.observation);
         const nextObsBatch = batch.map((b) => b.nextObservation);
-        const qCurr = (dqnModel.predictBatch(obsBatch) as tf.Tensor2D).arraySync() as number[][];
-        const qNext = (targetModel.predictBatch(nextObsBatch) as tf.Tensor2D).arraySync() as number[][];
+        const qCurrTensor = dqnModel.predictBatch(obsBatch) as tf.Tensor2D;
+        const qNextTensor = targetModel.predictBatch(nextObsBatch) as tf.Tensor2D;
+        const qCurr = qCurrTensor.arraySync() as number[][];
+        const qNext = qNextTensor.arraySync() as number[][];
+        qCurrTensor.dispose();
+        qNextTensor.dispose();
         for (let i = 0; i < batch.length; i++) {
           const { action, reward: r, done: d } = batch[i];
           if (d) {
