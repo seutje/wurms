@@ -334,6 +334,8 @@ const aiDemoLoop = GameLoop({
 
 // Start Game Button
 startGameButton.addEventListener('click', () => {
+  soundManager.unlock();
+  soundManager.playSound('click');
   startScreen.style.display = 'none';
   gameScreen.style.display = 'block';
   aiDemoLoop.stop(); // Stop AI demo when game starts
@@ -347,6 +349,8 @@ startGameButton.addEventListener('click', () => {
 playAgainButton.addEventListener('click', () => {
   gameOverScreen.style.display = 'none';
   startScreen.style.display = 'flex';
+  soundManager.unlock();
+  soundManager.playSound('click');
   initAiDemo();
   aiDemoLoop.start(); // Restart AI demo
 });
