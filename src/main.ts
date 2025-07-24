@@ -28,6 +28,18 @@ const gameOverMessage = document.getElementById('game-over-message') as HTMLElem
 const startGameButton = document.getElementById('start-game-button') as HTMLButtonElement;
 const playAgainButton = document.getElementById('play-again-button') as HTMLButtonElement;
 
+// AI model for the demo
+let demoModel: DQNModel | null = null;
+async function loadDemoModel() {
+  try {
+    demoModel = await DQNModel.load('/models/dqn-model/model.json');
+    console.log('Demo AI Model loaded successfully.');
+  } catch (error) {
+    console.warn('Could not load demo AI model, using random demo AI.', error);
+  }
+}
+loadDemoModel();
+
 
 
 // Main Game Initialization and Loop
@@ -260,17 +272,35 @@ const aiDemoLoop = GameLoop({
   update: () => {
     aiDemoWurm1.update(aiDemoTerrain);
     aiDemoWurm2.update(aiDemoTerrain);
-    // Simplified AI logic for demo
     if (aiDemoProjectiles.length === 0) {
-      const aiAngle = Math.random() * 180;
-      const aiPower = Math.random() * 100;
-      const aiWeaponOptions = Object.keys(weaponProperties);
-      const aiWeapon = aiWeaponOptions[Math.floor(Math.random() * aiWeaponOptions.length)];
+      const shooter = aiDemoTurn === 'wurm1' ? aiDemoWurm1 : aiDemoWurm2;
+      const target = aiDemoTurn === 'wurm1' ? aiDemoWurm2 : aiDemoWurm1;
+      let aiAngle: number;
+      let aiPower: number;
+      let aiWeapon: string;
+
+      if (demoModel) {
+        const observation = getObservation(shooter, target, aiDemoTerrain);
+        const prediction = demoModel.predict(observation);
+        const actionIndex = prediction.argMax(-1).dataSync()[0];
+
+        const weaponIndex = Math.floor(actionIndex / (10 * 10));
+        const angleBin = Math.floor((actionIndex % 100) / 10);
+        const powerBin = actionIndex % 10;
+
+        aiWeapon = WEAPON_CHOICES[weaponIndex];
+        aiAngle = angleBin * 18;
+        aiPower = powerBin * 10;
+      } else {
+        aiAngle = Math.random() * 180;
+        aiPower = Math.random() * 100;
+        const aiWeaponOptions = Object.keys(weaponProperties);
+        aiWeapon = aiWeaponOptions[Math.floor(Math.random() * aiWeaponOptions.length)];
+      }
 
       const { radius, damage, explosionRadius, fuse } = weaponProperties[aiWeapon];
 
       const radians = aiAngle * Math.PI / 180;
-      const shooter = aiDemoTurn === 'wurm1' ? aiDemoWurm1 : aiDemoWurm2;
       const direction = aiDemoTurn === 'wurm1' ? 1 : -1;
       shooter.barrelAngle = direction === 1 ? aiAngle : 180 - aiAngle;
       const startX = shooter.x + shooter.width / 2 + Math.cos(radians) * radius * direction - radius;
