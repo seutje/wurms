@@ -26,7 +26,7 @@ init(canvas);
 
 // Game setup using shared Game class
 const game = new Game(canvas, canvas.getContext('2d')!);
-const { playerWurm, aiWurm, terrain } = game;
+const { playerWurm, aiWurm } = game;
 
 function getDummyPlayerShot() {
   const weapon = WEAPON_CHOICES[Math.floor(Math.random() * WEAPON_CHOICES.length)];
@@ -36,7 +36,7 @@ function getDummyPlayerShot() {
 }
 
 // DQN Model setup
-const observationSpaceSize = 4 + canvas.width / 20;
+const observationSpaceSize = 4;
 const actionSpaceSize = WEAPON_CHOICES.length * 10 * 10;
 const dqnModel = new DQNModel([observationSpaceSize], actionSpaceSize);
 const targetModel = new DQNModel([observationSpaceSize], actionSpaceSize);
@@ -71,7 +71,7 @@ async function train() {
     let episodeLossCount = 0;
 
     while (!done) {
-      const observation = getObservation(aiWurm, playerWurm, terrain);
+      const observation = getObservation(aiWurm, playerWurm);
       const qValues = dqnModel.predict(observation);
       const qArr = (qValues.arraySync() as number[][])[0];
       const stepQMin = Math.min(...qArr);
@@ -110,7 +110,7 @@ async function train() {
 
       game.simulateUntilProjectilesResolve();
 
-      const nextObservation = getObservation(aiWurm, playerWurm, terrain);
+      const nextObservation = getObservation(aiWurm, playerWurm);
       const newDistance = Math.abs(aiWurm.x - playerWurm.x);
       const distanceDelta = newDistance - prevDistance;
       prevDistance = newDistance;

@@ -36,7 +36,6 @@ export class DQNModel {
       observation.playerWurmY,
       observation.aiWurmX,
       observation.aiWurmY,
-      ...observation.terrainHeights,
     ];
     return tf.tensor2d([flatObservation], [1, this.inputShape[0]]);
   }
@@ -47,7 +46,6 @@ export class DQNModel {
       obs.playerWurmY,
       obs.aiWurmX,
       obs.aiWurmY,
-      ...obs.terrainHeights,
     ]);
     return tf.tensor2d(data, [observations.length, this.inputShape[0]]);
   }
