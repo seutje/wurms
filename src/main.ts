@@ -2,7 +2,6 @@
 import kontra from 'kontra/kontra.mjs';
 const { init, GameLoop } = kontra;
 import { Terrain } from './Terrain.js';
-import { Projectile } from './Projectile.js';
 import { Wurm } from './Wurm.js';
 import { Game } from './Game.js';
 import { DQNModel } from './ai/DQNModel.js';
@@ -10,7 +9,6 @@ import { getObservation } from './ai/ObservationSpace.js';
 import { WEAPON_CHOICES } from './ai/ActionSpace.js';
 import { weaponProperties } from './WeaponProperties.js';
 import { SoundManager } from './SoundManager.js';
-import { Explosion } from './Explosion.js';
 import { setupKeyboardControls } from './KeyboardControls.js';
 
 // Sound Manager
