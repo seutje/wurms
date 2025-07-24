@@ -48,18 +48,31 @@ export class Game {
     damageWurm(this.aiWurm);
   }
 
-  constructor(canvas: HTMLCanvasElement, context: CanvasRenderingContext2D) {
+  private mapSeed?: number;
+
+  constructor(
+    canvas: HTMLCanvasElement,
+    context: CanvasRenderingContext2D,
+    seed?: number
+  ) {
     this.canvas = canvas;
     this.context = context;
     init(canvas);
-    this.terrain = new Terrain(canvas.width, canvas.height, context);
+    this.mapSeed = seed;
+    this.terrain = new Terrain(canvas.width, canvas.height, context, seed);
     const [playerX, aiX] = this.getSpawnPositions();
     this.playerWurm = new Wurm(playerX, this.terrain.getGroundHeight(playerX), 100, 'blue');
     this.aiWurm = new Wurm(aiX, this.terrain.getGroundHeight(aiX), 100, 'red');
   }
 
-  public reset() {
-    this.terrain = new Terrain(this.canvas.width, this.canvas.height, this.context);
+  public reset(seed?: number) {
+    this.mapSeed = seed ?? this.mapSeed;
+    this.terrain = new Terrain(
+      this.canvas.width,
+      this.canvas.height,
+      this.context,
+      this.mapSeed
+    );
     const [playerX, aiX] = this.getSpawnPositions();
     this.playerWurm.x = playerX;
     this.playerWurm.y = this.terrain.getGroundHeight(playerX) - this.playerWurm.height;
