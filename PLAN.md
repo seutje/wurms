@@ -54,7 +54,6 @@ We will use a library like TensorFlow.js. A policy-based method like Proximal Po
 The input to the RL model at each step. This needs to represent the game state concisely. It could include:
 *   Position of the AI's wurm.
 *   Position of the enemy wurm.
-*   Health of both wurms.
 *   A simplified representation of the terrain (e.g., a down-sampled grid around the wurms).
 *   Available weapons.
 

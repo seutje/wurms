@@ -4,10 +4,8 @@ import { Terrain } from '../Terrain.js';
 export interface Observation {
   playerWurmX: number;
   playerWurmY: number;
-  playerWurmHealth: number;
   aiWurmX: number;
   aiWurmY: number;
-  aiWurmHealth: number;
   // Simplified terrain representation (e.g., heights at intervals)
   terrainHeights: number[];
 }
@@ -31,10 +29,8 @@ export function getObservation(playerWurm: Wurm, aiWurm: Wurm, terrain: Terrain)
   return {
     playerWurmX: playerWurm.x,
     playerWurmY: playerWurm.y,
-    playerWurmHealth: playerWurm.health,
     aiWurmX: aiWurm.x,
     aiWurmY: aiWurm.y,
-    aiWurmHealth: aiWurm.health,
     terrainHeights,
   };
 }
