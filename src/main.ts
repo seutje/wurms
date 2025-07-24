@@ -11,6 +11,7 @@ import { WEAPON_CHOICES } from './ai/ActionSpace.js';
 import { weaponProperties } from './WeaponProperties.js';
 import { SoundManager } from './SoundManager.js';
 import { Explosion } from './Explosion.js';
+import { setupKeyboardControls } from './KeyboardControls.js';
 
 // Sound Manager
 const soundManager = new SoundManager();
@@ -111,6 +112,13 @@ function startGame(seed?: number) {
     }
   });
 
+  const removeKeyboard = setupKeyboardControls({
+    angleInput,
+    powerInput,
+    fireButton,
+    isPlanning: () => currentGameState === GameState.PLANNING && whoseTurn === 'player',
+  });
+
   mainGameLoop = GameLoop({
     update: () => {
       playerWurm.update(terrain);
@@ -187,6 +195,7 @@ function startGame(seed?: number) {
           gameScreen.style.display = 'none';
           gameOverScreen.style.display = 'flex';
           mainGameLoop.stop(); // Stop the main game loop
+          removeKeyboard();
           break;
       }
     },
