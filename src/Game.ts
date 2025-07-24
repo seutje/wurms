@@ -175,10 +175,29 @@ export class Game {
 
       if (this.terrain.isColliding(projectile.x + projectile.radius, projectile.y + projectile.radius)) {
         if (projectile.fuse > 0) {
+          const verticalCollision = this.terrain.isColliding(
+            prevX + projectile.radius,
+            projectile.y + projectile.radius
+          );
+          const horizontalCollision = this.terrain.isColliding(
+            projectile.x + projectile.radius,
+            prevY + projectile.radius
+          );
           projectile.x = prevX;
           projectile.y = prevY;
-          projectile.dy = -projectile.dy * 0.5;
-          projectile.dx *= 0.7;
+          if (horizontalCollision && !verticalCollision) {
+            projectile.dx = -projectile.dx * 0.5;
+            projectile.dy *= 0.7;
+          } else if (verticalCollision && !horizontalCollision) {
+            projectile.dy = -projectile.dy * 0.5;
+            projectile.dx *= 0.7;
+          } else if (Math.abs(projectile.dx) > Math.abs(projectile.dy)) {
+            projectile.dx = -projectile.dx * 0.5;
+            projectile.dy *= 0.7;
+          } else {
+            projectile.dy = -projectile.dy * 0.5;
+            projectile.dx *= 0.7;
+          }
         } else {
           this.terrain.destroy(
             projectile.x + projectile.radius,
