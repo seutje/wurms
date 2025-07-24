@@ -56,12 +56,24 @@ export class DQNModel {
     return tf.tensor2d(data, [observations.length, this.inputShape[0]]);
   }
 
+  /**
+   * Predict Q-values for a single observation.
+   * The caller is responsible for disposing the returned tensor.
+   */
   public predict(observation: Observation): tf.Tensor<tf.Rank> {
-    return this.model.predict(this.encode(observation)) as tf.Tensor<tf.Rank>;
+    return tf.tidy(() =>
+      this.model.predict(this.encode(observation)) as tf.Tensor<tf.Rank>
+    );
   }
 
+  /**
+   * Predict Q-values for a batch of observations.
+   * The caller is responsible for disposing the returned tensor.
+   */
   public predictBatch(observations: Observation[]): tf.Tensor {
-    return this.model.predict(this.encodeBatch(observations)) as tf.Tensor;
+    return tf.tidy(() =>
+      this.model.predict(this.encodeBatch(observations)) as tf.Tensor
+    );
   }
 
   public train(observation: Observation, target: tf.Tensor<tf.Rank>) {
