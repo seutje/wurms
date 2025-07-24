@@ -2,6 +2,7 @@ import kontra from 'kontra/kontra.mjs';
 const { init } = kontra;
 import { Terrain } from './Terrain.js';
 import { Projectile } from './Projectile.js';
+import { Grenade } from './Grenade.js';
 import { Wurm } from './Wurm.js';
 import { weaponProperties } from './WeaponProperties.js';
 import { handleProjectileWurmCollision } from './collision.js';
@@ -46,7 +47,9 @@ export class Game {
     const velX = power * Math.cos(radians) * 0.15;
     const velY = power * Math.sin(radians) * -0.15;
 
-    const projectile = new Projectile(startX, startY, velX, velY, radius, damage, explosionRadius);
+    const projectile = weapon === 'grenade'
+      ? new Grenade(startX, startY, velX, velY, radius, damage, explosionRadius)
+      : new Projectile(startX, startY, velX, velY, radius, damage, explosionRadius);
     this.projectiles.push(projectile);
     this.currentTurnProjectiles.push(projectile);
     return projectile;
@@ -72,6 +75,38 @@ export class Game {
         projectile.x = this.canvas.width - projectile.radius * 2;
         projectile.dx = -projectile.dx;
       }
+
+      if (projectile instanceof Grenade) {
+        const hitPlayer = this.playerWurm.collidesWith(projectile);
+        const hitAi = this.aiWurm.collidesWith(projectile);
+        const hitTerrain = this.terrain.isColliding(projectile.x + projectile.radius, projectile.y + projectile.radius);
+        if (hitPlayer || hitAi || hitTerrain) {
+          projectile.dy = -projectile.dy * 0.5;
+          projectile.dx *= 0.7;
+        }
+        if (projectile.isFuseExpired()) {
+          this.terrain.destroy(projectile.x + projectile.radius, projectile.y + projectile.radius, projectile.explosionRadius);
+          if (hitPlayer) {
+            this.playerWurm.takeDamage(projectile.damage);
+          }
+          if (hitAi) {
+            this.aiWurm.takeDamage(projectile.damage);
+          }
+          this.projectiles.splice(i, 1);
+          this.removeFromCurrent(projectile);
+          continue;
+        }
+        if (
+          projectile.x + projectile.radius * 2 < 0 ||
+          projectile.x > this.canvas.width ||
+          projectile.y > this.canvas.height
+        ) {
+          this.projectiles.splice(i, 1);
+          this.removeFromCurrent(projectile);
+        }
+        continue;
+      }
+
       if (handleProjectileWurmCollision(projectile, this.playerWurm, this.terrain)) {
         console.log('Player hit!');
         this.projectiles.splice(i, 1);
