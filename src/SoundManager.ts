@@ -26,14 +26,34 @@ export class SoundManager {
     }
   }
 
-  public async loadSound(name: string, url: string) {
-    try {
-      const response = await fetch(url);
-      const arrayBuffer = await response.arrayBuffer();
-      this.sounds[name] = await this.audioContext.decodeAudioData(arrayBuffer);
-    } catch (error) {
-      console.warn(`Failed to load sound ${name} from ${url}`, error);
+  private createToneBuffer(frequency: number, duration: number): AudioBuffer {
+    const sampleRate = this.audioContext.sampleRate;
+    const length = sampleRate * duration;
+    const buffer = this.audioContext.createBuffer(1, length, sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < length; i++) {
+      data[i] = Math.sin((2 * Math.PI * frequency * i) / sampleRate);
     }
+    return buffer;
+  }
+
+  private createNoiseBuffer(duration: number): AudioBuffer {
+    const sampleRate = this.audioContext.sampleRate;
+    const length = sampleRate * duration;
+    const buffer = this.audioContext.createBuffer(1, length, sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < length; i++) {
+      data[i] = Math.random() * 2 - 1;
+    }
+    return buffer;
+  }
+
+  public createTone(name: string, frequency: number, duration: number) {
+    this.sounds[name] = this.createToneBuffer(frequency, duration);
+  }
+
+  public createNoise(name: string, duration: number) {
+    this.sounds[name] = this.createNoiseBuffer(duration);
   }
 
   public playSound(name: string, volume: number = 1) {

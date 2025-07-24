@@ -14,10 +14,10 @@ import { Explosion } from './Explosion.js';
 
 // Sound Manager
 const soundManager = new SoundManager();
-soundManager.loadSound('fire', './sounds/fire.wav');
-soundManager.loadSound('explosion', './sounds/explosion.wav');
-soundManager.loadSound('damage', './sounds/damage.wav');
-soundManager.loadSound('click', './sounds/click.wav');
+soundManager.createTone('fire', 440, 0.2);
+soundManager.createNoise('explosion', 0.6);
+soundManager.createTone('damage', 880, 0.2);
+soundManager.createTone('click', 660, 0.05);
 
 // Get screen elements
 const startScreen = document.getElementById('start-screen') as HTMLElement;
