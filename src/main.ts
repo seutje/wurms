@@ -111,14 +111,17 @@ function startGame() {
     update: () => {
       playerWurm.update(terrain);
       aiWurm.update(terrain);
+
+      const prevPlayer = playerWurm.health;
+      const prevAi = aiWurm.health;
+
+      game.update();
+
       switch (currentGameState) {
         case GameState.PLANNING:
           // Player is choosing actions
           break;
         case GameState.EXECUTION:
-          const prevPlayer = playerWurm.health;
-          const prevAi = aiWurm.health;
-          game.update();
           if (playerWurm.health < prevPlayer || aiWurm.health < prevAi) {
             soundManager.playSound('explosion');
             soundManager.playSound('damage');
