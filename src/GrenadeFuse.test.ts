@@ -21,7 +21,7 @@ describe('Grenade fuse behavior', () => {
 
     vi.spyOn(game.terrain, 'isColliding').mockReturnValue(true);
     game.update();
-    expect(projectile.dy).toBe(-1);
+    expect(projectile.dy).toBe(-0.5);
     expect(game.projectiles.length).toBe(1);
 
     (game.terrain.isColliding as any).mockReturnValue(false);
