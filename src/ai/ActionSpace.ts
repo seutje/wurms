@@ -7,6 +7,7 @@ export interface Action {
 export const WEAPON_CHOICES = [
   'bazooka',
   'grenade',
+  'clusterGrenade',
   'mortar',
   'nuke',
 ];
