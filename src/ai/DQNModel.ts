@@ -5,10 +5,14 @@ export class DQNModel {
   private model: tf.LayersModel;
   private inputShape: number[];
   private outputSize: number;
+  private optimizer: tf.Optimizer;
+  private clipNorm: number;
 
-  constructor(inputShape: number[], outputSize: number) {
+  constructor(inputShape: number[], outputSize: number, clipNorm = 1) {
     this.inputShape = inputShape;
     this.outputSize = outputSize;
+    this.clipNorm = clipNorm;
+    this.optimizer = tf.train.adam(0.0005);
     this.model = this.buildModel();
   }
 
@@ -22,7 +26,7 @@ export class DQNModel {
     model.add(tf.layers.dense({ units: 64, activation: 'relu', inputShape: this.inputShape }));
     model.add(tf.layers.dense({ units: 64, activation: 'relu' }));
     model.add(tf.layers.dense({ units: this.outputSize })); // Output for Q-values
-    model.compile({ optimizer: tf.train.adam(), loss: 'meanSquaredError' });
+    model.compile({ optimizer: this.optimizer, loss: 'meanSquaredError' });
     return model;
   }
 
@@ -65,9 +69,33 @@ export class DQNModel {
     return this.model.fit(inputTensor, target);
   }
 
-  public trainBatch(observations: Observation[], targets: tf.Tensor) {
+  public trainBatch(observations: Observation[], targets: tf.Tensor2D): number {
     const inputTensor = this.encodeBatch(observations);
-    return this.model.fit(inputTensor, targets);
+    const { value, grads } = this.optimizer.computeGradients(() => {
+      const preds = this.model.predict(inputTensor) as tf.Tensor2D;
+      return tf.losses.huberLoss(targets, preds).mean() as tf.Scalar;
+    });
+
+    const gradValues = Object.values(grads);
+    const globalNorm = tf.tidy(() => {
+      const squares = gradValues.map((g) => tf.sum(tf.square(g)));
+      return tf.sqrt(tf.addN(squares));
+    });
+    const normValue = globalNorm.dataSync()[0];
+    const scale = normValue > this.clipNorm ? this.clipNorm / normValue : 1;
+    const clipped: Record<string, tf.Tensor> = {};
+    for (const key in grads) {
+      clipped[key] = grads[key].mul(scale);
+    }
+
+    this.optimizer.applyGradients(clipped);
+    const loss = value.dataSync()[0];
+    value.dispose();
+    globalNorm.dispose();
+    gradValues.forEach((g) => g.dispose());
+    Object.values(clipped).forEach((g) => g.dispose());
+    inputTensor.dispose();
+    return loss;
   }
 
   public getOutputSize() {

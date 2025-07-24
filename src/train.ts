@@ -129,6 +129,10 @@ async function train() {
         const obsBatch = batch.map((b) => b.observation);
         const nextObsBatch = batch.map((b) => b.nextObservation);
         const qCurr = (dqnModel.predictBatch(obsBatch) as tf.Tensor2D).arraySync() as number[][];
+        const flatQ = qCurr.flat();
+        const qMax = Math.max(...flatQ);
+        const qMin = Math.min(...flatQ);
+        console.log(`Q range: ${qMin.toFixed(4)} to ${qMax.toFixed(4)}`);
         const qNext = (targetModel.predictBatch(nextObsBatch) as tf.Tensor2D).arraySync() as number[][];
         for (let i = 0; i < batch.length; i++) {
           const { action, reward: r, done: d } = batch[i];
@@ -139,7 +143,8 @@ async function train() {
           }
         }
         const targetTensor = tf.tensor2d(qCurr, [batch.length, actionSpaceSize]);
-        await dqnModel.trainBatch(obsBatch, targetTensor);
+        const loss = dqnModel.trainBatch(obsBatch, targetTensor);
+        console.log(`Batch loss: ${loss.toFixed(6)}`);
         targetTensor.dispose();
       }
 
