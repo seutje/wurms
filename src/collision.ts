@@ -8,7 +8,6 @@ export function handleProjectileWurmCollision(
   terrain: Terrain
 ): boolean {
   if (wurm.collidesWith(projectile)) {
-    wurm.takeDamage(projectile.damage);
     terrain.destroy(projectile.x, projectile.y, projectile.explosionRadius);
     return true;
   }

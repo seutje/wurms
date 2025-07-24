@@ -111,14 +111,17 @@ function startGame() {
     update: () => {
       playerWurm.update(terrain);
       aiWurm.update(terrain);
+
+      const prevPlayer = playerWurm.health;
+      const prevAi = aiWurm.health;
+
+      game.update();
+
       switch (currentGameState) {
         case GameState.PLANNING:
           // Player is choosing actions
           break;
         case GameState.EXECUTION:
-          const prevPlayer = playerWurm.health;
-          const prevAi = aiWurm.health;
-          game.update();
           if (playerWurm.health < prevPlayer || aiWurm.health < prevAi) {
             soundManager.playSound('explosion');
             soundManager.playSound('damage');
@@ -213,6 +216,19 @@ let aiDemoProjectiles: Projectile[] = [];
 let aiDemoExplosions: Explosion[] = [];
 let aiDemoTurn: 'wurm1' | 'wurm2' = 'wurm1';
 
+function applyDemoExplosionDamage(x: number, y: number, radius: number, damage: number) {
+  const damageWurm = (wurm: Wurm) => {
+    const centerX = wurm.x + wurm.width / 2;
+    const centerY = wurm.y + wurm.height / 2;
+    const distance = Math.hypot(centerX - x, centerY - y);
+    if (distance <= radius) {
+      wurm.takeDamage(damage);
+    }
+  };
+  damageWurm(aiDemoWurm1);
+  damageWurm(aiDemoWurm2);
+}
+
 function initAiDemo() {
   aiDemoTerrain = new Terrain(aiDemoCanvas.width, aiDemoCanvas.height, aiDemoContext);
   aiDemoWurm1 = new Wurm(50, aiDemoTerrain.getGroundHeight(50), 100, 'red');
@@ -277,6 +293,12 @@ const aiDemoLoop = GameLoop({
           projectile.y + projectile.radius,
           projectile.explosionRadius
         ));
+        applyDemoExplosionDamage(
+          projectile.x + projectile.radius,
+          projectile.y + projectile.radius,
+          projectile.explosionRadius,
+          projectile.damage
+        );
         aiDemoProjectiles.splice(i, 1);
         soundManager.playSound('explosion');
       } else if (projectile.x + (projectile.radius * 2) < 0 || projectile.x > aiDemoCanvas.width || projectile.y + (projectile.radius * 2) < 0 || projectile.y > aiDemoCanvas.height) {
