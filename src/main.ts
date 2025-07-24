@@ -28,24 +28,44 @@ const gameOverMessage = document.getElementById('game-over-message') as HTMLElem
 const startGameButton = document.getElementById('start-game-button') as HTMLButtonElement;
 const playAgainButton = document.getElementById('play-again-button') as HTMLButtonElement;
 
-// AI model for the demo
-let demoModel: DQNModel | null = null;
-async function loadDemoModel() {
-  try {
-    demoModel = await DQNModel.load('/models/dqn-model/model.json');
-    console.log('Demo AI Model loaded successfully.');
-  } catch (error) {
-    console.warn('Could not load demo AI model, using random demo AI.', error);
+function getAiAction(
+  shooter: Wurm,
+  target: Wurm,
+  terrain: Terrain,
+  model: DQNModel | null
+) {
+  let aiAngle: number;
+  let aiPower: number;
+  let aiWeapon: string;
+
+  if (model) {
+    const observation = getObservation(shooter, target, terrain);
+    const prediction = model.predict(observation);
+    const actionIndex = prediction.argMax(-1).dataSync()[0];
+
+    const weaponIndex = Math.floor(actionIndex / (10 * 10));
+    const angleBin = Math.floor((actionIndex % 100) / 10);
+    const powerBin = actionIndex % 10;
+
+    aiWeapon = WEAPON_CHOICES[weaponIndex];
+    aiAngle = angleBin * 18;
+    aiPower = powerBin * 10;
+  } else {
+    aiAngle = Math.random() * 180;
+    aiPower = Math.random() * 100;
+    const aiWeaponOptions = Object.keys(weaponProperties);
+    aiWeapon = aiWeaponOptions[Math.floor(Math.random() * aiWeaponOptions.length)];
   }
+
+  return { aiWeapon, aiAngle, aiPower };
 }
-loadDemoModel();
 
 
 
 // Main Game Initialization and Loop
 let mainGameLoop: any;
 
-function startGame(seed?: number) {
+function startGame(seed?: number, playerIsAI = false, showUI = true) {
   const canvas = document.getElementById('game') as HTMLCanvasElement;
   const context = canvas.getContext('2d') as CanvasRenderingContext2D;
 
@@ -99,37 +119,41 @@ function startGame(seed?: number) {
 
   angleValueSpan.textContent = (180 - parseFloat(angleInput.value)).toString();
 
-  // Update angle and power display
-  angleInput.addEventListener('input', () => {
-    const angle = 180 - parseFloat(angleInput.value);
-    angleValueSpan.textContent = angle.toString();
-    playerWurm.barrelAngle = angle;
-  });
-  powerInput.addEventListener('input', () => {
-    powerValueSpan.textContent = powerInput.value;
-  });
+  let removeKeyboard = () => {};
 
-  fireButton.addEventListener('click', () => {
-    if (currentGameState === GameState.PLANNING) {
-      soundManager.playSound('click');
+  if (showUI && !playerIsAI) {
+    // Update angle and power display
+    angleInput.addEventListener('input', () => {
       const angle = 180 - parseFloat(angleInput.value);
-      const power = parseFloat(powerInput.value);
-      const weapon = weaponSelect.value;
+      angleValueSpan.textContent = angle.toString();
+      playerWurm.barrelAngle = angle;
+    });
+    powerInput.addEventListener('input', () => {
+      powerValueSpan.textContent = powerInput.value;
+    });
 
-      game.fire(playerWurm, weapon, angle, power);
-      soundManager.playSound('fire');
+    fireButton.addEventListener('click', () => {
+      if (currentGameState === GameState.PLANNING) {
+        soundManager.playSound('click');
+        const angle = 180 - parseFloat(angleInput.value);
+        const power = parseFloat(powerInput.value);
+        const weapon = weaponSelect.value;
 
-      currentGameState = GameState.EXECUTION;
-      whoseTurn = 'ai';
-    }
-  });
+        game.fire(playerWurm, weapon, angle, power);
+        soundManager.playSound('fire');
 
-  const removeKeyboard = setupKeyboardControls({
-    angleInput,
-    powerInput,
-    fireButton,
-    isPlanning: () => currentGameState === GameState.PLANNING && whoseTurn === 'player',
-  });
+        currentGameState = GameState.EXECUTION;
+        whoseTurn = 'ai';
+      }
+    });
+
+    removeKeyboard = setupKeyboardControls({
+      angleInput,
+      powerInput,
+      fireButton,
+      isPlanning: () => currentGameState === GameState.PLANNING && whoseTurn === 'player',
+    });
+  }
 
   mainGameLoop = GameLoop({
     update: () => {
@@ -143,7 +167,18 @@ function startGame(seed?: number) {
 
       switch (currentGameState) {
         case GameState.PLANNING:
-          // Player is choosing actions
+          if (playerIsAI && whoseTurn === 'player') {
+            const { aiWeapon, aiAngle, aiPower } = getAiAction(
+              playerWurm,
+              aiWurm,
+              terrain,
+              aiModel
+            );
+            game.fire(playerWurm, aiWeapon, aiAngle, aiPower);
+            soundManager.playSound('fire');
+            currentGameState = GameState.EXECUTION;
+            whoseTurn = 'ai';
+          }
           break;
         case GameState.EXECUTION:
           if (playerWurm.health < prevPlayer || aiWurm.health < prevAi) {
@@ -172,31 +207,12 @@ function startGame(seed?: number) {
           }
           break;
         case GameState.RESOLUTION:
-          // AI takes its turn
-          let aiAngle: number;
-          let aiPower: number;
-          let aiWeapon: string;
-
-          if (aiModel) {
-            const observation = getObservation(aiWurm, playerWurm, terrain); // AI observes from its perspective
-            const prediction = aiModel.predict(observation);
-            const actionIndex = prediction.argMax(-1).dataSync()[0];
-
-            const weaponIndex = Math.floor(actionIndex / (10 * 10));
-            const angleBin = Math.floor((actionIndex % 100) / 10);
-            const powerBin = actionIndex % 10;
-
-            aiWeapon = WEAPON_CHOICES[weaponIndex];
-            aiAngle = angleBin * 18; // 0-180 in 10 bins
-            aiPower = powerBin * 10; // 0-100 in 10 bins
-          } else {
-            // Random AI fallback
-            aiAngle = Math.random() * 180;
-            aiPower = Math.random() * 100;
-            const aiWeaponOptions = Object.keys(weaponProperties);
-            aiWeapon = aiWeaponOptions[Math.floor(Math.random() * aiWeaponOptions.length)];
-          }
-
+          const { aiWeapon, aiAngle, aiPower } = getAiAction(
+            aiWurm,
+            playerWurm,
+            terrain,
+            aiModel
+          );
           game.fire(aiWurm, aiWeapon, aiAngle, aiPower);
           soundManager.playSound('fire');
 
@@ -204,10 +220,16 @@ function startGame(seed?: number) {
           whoseTurn = 'player';
           break;
         case GameState.GAME_OVER:
-          gameScreen.style.display = 'none';
-          gameOverScreen.style.display = 'flex';
-          mainGameLoop.stop(); // Stop the main game loop
-          removeKeyboard();
+          if (showUI) {
+            gameScreen.style.display = 'none';
+            gameOverScreen.style.display = 'flex';
+            mainGameLoop.stop();
+            removeKeyboard();
+          } else {
+            game.reset();
+            currentGameState = GameState.PLANNING;
+            whoseTurn = 'player';
+          }
           break;
       }
     },
@@ -225,177 +247,32 @@ function startGame(seed?: number) {
   mainGameLoop.start();
 }
 
-// AI vs AI Demo Loop on the main canvas
-const aiDemoCanvas = document.getElementById('game') as HTMLCanvasElement;
-aiDemoCanvas.width = 800;
-aiDemoCanvas.height = 600;
-
-const aiDemoContext = aiDemoCanvas.getContext('2d') as CanvasRenderingContext2D;
-
-init(aiDemoCanvas);
-
-let aiDemoTerrain: Terrain;
-let aiDemoWurm1: Wurm;
-let aiDemoWurm2: Wurm;
-let aiDemoProjectiles: Projectile[] = [];
-let aiDemoExplosions: Explosion[] = [];
-let aiDemoTurn: 'wurm1' | 'wurm2' = 'wurm1';
-
-function applyDemoExplosionDamage(x: number, y: number, radius: number, damage: number) {
-  const damageWurm = (wurm: Wurm) => {
-    const centerX = wurm.x + wurm.width / 2;
-    const centerY = wurm.y + wurm.height / 2;
-    const distance = Math.hypot(centerX - x, centerY - y);
-    if (distance <= radius) {
-      wurm.takeDamage(damage);
-    }
-  };
-  damageWurm(aiDemoWurm1);
-  damageWurm(aiDemoWurm2);
-}
-
-function initAiDemo() {
-  aiDemoTerrain = new Terrain(aiDemoCanvas.width, aiDemoCanvas.height, aiDemoContext);
-  aiDemoWurm1 = new Wurm(50, aiDemoTerrain.getGroundHeight(50), 100, 'red');
-  aiDemoWurm2 = new Wurm(
-    aiDemoCanvas.width - 50,
-    aiDemoTerrain.getGroundHeight(aiDemoCanvas.width - 50),
-    100,
-    'yellow'
-  );
-  aiDemoProjectiles = [];
-  aiDemoExplosions = [];
-  aiDemoTurn = 'wurm1';
-}
-
-const aiDemoLoop = GameLoop({
-  update: () => {
-    aiDemoWurm1.update(aiDemoTerrain);
-    aiDemoWurm2.update(aiDemoTerrain);
-    if (aiDemoProjectiles.length === 0) {
-      const shooter = aiDemoTurn === 'wurm1' ? aiDemoWurm1 : aiDemoWurm2;
-      const target = aiDemoTurn === 'wurm1' ? aiDemoWurm2 : aiDemoWurm1;
-      let aiAngle: number;
-      let aiPower: number;
-      let aiWeapon: string;
-
-      if (demoModel) {
-        const observation = getObservation(shooter, target, aiDemoTerrain);
-        const prediction = demoModel.predict(observation);
-        const actionIndex = prediction.argMax(-1).dataSync()[0];
-
-        const weaponIndex = Math.floor(actionIndex / (10 * 10));
-        const angleBin = Math.floor((actionIndex % 100) / 10);
-        const powerBin = actionIndex % 10;
-
-        aiWeapon = WEAPON_CHOICES[weaponIndex];
-        aiAngle = angleBin * 18;
-        aiPower = powerBin * 10;
-      } else {
-        aiAngle = Math.random() * 180;
-        aiPower = Math.random() * 100;
-        const aiWeaponOptions = Object.keys(weaponProperties);
-        aiWeapon = aiWeaponOptions[Math.floor(Math.random() * aiWeaponOptions.length)];
-      }
-
-      const { radius, damage, explosionRadius, fuse } = weaponProperties[aiWeapon];
-
-      const radians = aiAngle * Math.PI / 180;
-      const direction = aiDemoTurn === 'wurm1' ? 1 : -1;
-      shooter.barrelAngle = direction === 1 ? aiAngle : 180 - aiAngle;
-      const startX = shooter.x + shooter.width / 2 + Math.cos(radians) * radius * direction - radius;
-      const startY = shooter.y + shooter.height / 2 - Math.sin(radians) * radius - radius;
-      const velX = aiPower * Math.cos(radians) * 0.15 * direction;
-      const velY = aiPower * Math.sin(radians) * -0.15;
-
-      const projectile = new Projectile(
-        startX,
-        startY,
-        velX,
-        velY,
-        radius,
-        damage,
-        explosionRadius,
-        fuse
-      );
-      aiDemoProjectiles.push(projectile);
-      soundManager.playSound('fire');
-
-      aiDemoTurn = aiDemoTurn === 'wurm1' ? 'wurm2' : 'wurm1';
-    }
-
-    for (let i = aiDemoProjectiles.length - 1; i >= 0; i--) {
-      const projectile = aiDemoProjectiles[i];
-      projectile.update();
-
-      if (aiDemoTerrain.isColliding(projectile.x + projectile.radius, projectile.y + projectile.radius)) {
-        console.log(`AI Demo Projectile removed: Terrain collision at x: ${projectile.x}, y: ${projectile.y}, radius: ${projectile.radius}`);
-        aiDemoTerrain.destroy(projectile.x + projectile.radius, projectile.y + projectile.radius, projectile.explosionRadius);
-        aiDemoExplosions.push(new Explosion(
-          projectile.x + projectile.radius,
-          projectile.y + projectile.radius,
-          projectile.explosionRadius
-        ));
-        applyDemoExplosionDamage(
-          projectile.x + projectile.radius,
-          projectile.y + projectile.radius,
-          projectile.explosionRadius,
-          projectile.damage
-        );
-        aiDemoProjectiles.splice(i, 1);
-        soundManager.playSound('explosion');
-      } else if (projectile.x + (projectile.radius * 2) < 0 || projectile.x > aiDemoCanvas.width || projectile.y + (projectile.radius * 2) < 0 || projectile.y > aiDemoCanvas.height) {
-        aiDemoProjectiles.splice(i, 1);
-      }
-    }
-
-    for (let i = aiDemoExplosions.length - 1; i >= 0; i--) {
-      const explosion = aiDemoExplosions[i];
-      explosion.update();
-      if (explosion.isDone()) {
-        aiDemoExplosions.splice(i, 1);
-      }
-    }
-  },
-  render: () => {
-    aiDemoTerrain.draw();
-
-    aiDemoWurm1.draw();
-    aiDemoWurm2.draw();
-    for (const projectile of aiDemoProjectiles) {
-      projectile.render();
-    }
-    for (const explosion of aiDemoExplosions) {
-      explosion.draw(aiDemoContext);
-    }
-  }
-});
-
-// Start Game Button
 startGameButton.addEventListener('click', () => {
   soundManager.unlock();
   soundManager.playSound('click');
   startScreen.style.display = 'none';
   gameScreen.style.display = 'block';
-  aiDemoLoop.stop(); // Stop AI demo when game starts
-  aiDemoContext.clearRect(0, 0, aiDemoCanvas.width, aiDemoCanvas.height);
+  if (mainGameLoop) {
+    mainGameLoop.stop();
+  }
   const param = new URLSearchParams(window.location.search).get('seed');
   const seed = param ? parseInt(param, 10) : undefined;
-  startGame(seed); // Start main game loop
+  startGame(seed, false, true);
 });
 
-// Play Again Button
 playAgainButton.addEventListener('click', () => {
   gameOverScreen.style.display = 'none';
   startScreen.style.display = 'flex';
   soundManager.unlock();
   soundManager.playSound('click');
-  initAiDemo();
-  aiDemoLoop.start(); // Restart AI demo
+  if (mainGameLoop) {
+    mainGameLoop.stop();
+  }
+  startGame(undefined, true, false);
 });
 
-initAiDemo();
-aiDemoLoop.start(); // Start AI demo loop initially
+startGame(undefined, true, false);
+
 
 
 
