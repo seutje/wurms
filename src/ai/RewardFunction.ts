@@ -5,7 +5,6 @@ export function calculateReward(
   _aiWurm: Wurm,
   hitEnemy: boolean,
   hitSelf: boolean,
-  gameEnded: boolean,
   playerWon: boolean,
   aiWon: boolean,
   distanceDelta: number
