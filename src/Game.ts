@@ -37,7 +37,7 @@ export class Game {
   }
 
   public fire(wurm: Wurm, weapon: string, angle: number, power: number) {
-    const { radius, damage, explosionRadius } = weaponProperties[weapon];
+    const { radius, damage, explosionRadius, fuse } = weaponProperties[weapon];
     const radians = angle * Math.PI / 180;
     wurm.barrelAngle = angle;
     const offset = wurm.width / 2 + radius + 0.1;
@@ -46,7 +46,16 @@ export class Game {
     const velX = power * Math.cos(radians) * 0.15;
     const velY = power * Math.sin(radians) * -0.15;
 
-    const projectile = new Projectile(startX, startY, velX, velY, radius, damage, explosionRadius);
+    const projectile = new Projectile(
+      startX,
+      startY,
+      velX,
+      velY,
+      radius,
+      damage,
+      explosionRadius,
+      fuse
+    );
     this.projectiles.push(projectile);
     this.currentTurnProjectiles.push(projectile);
     return projectile;
@@ -64,7 +73,10 @@ export class Game {
     this.aiWurm.update(this.terrain);
     for (let i = this.projectiles.length - 1; i >= 0; i--) {
       const projectile = this.projectiles[i];
+      const prevX = projectile.x;
+      const prevY = projectile.y;
       projectile.update();
+
       if (projectile.x < 0) {
         projectile.x = 0;
         projectile.dx = -projectile.dx;
@@ -72,19 +84,49 @@ export class Game {
         projectile.x = this.canvas.width - projectile.radius * 2;
         projectile.dx = -projectile.dx;
       }
-      if (handleProjectileWurmCollision(projectile, this.playerWurm, this.terrain)) {
+
+      if (projectile.fuse <= 0 && handleProjectileWurmCollision(projectile, this.playerWurm, this.terrain)) {
         console.log('Player hit!');
         this.projectiles.splice(i, 1);
         this.removeFromCurrent(projectile);
         continue;
       }
-      if (handleProjectileWurmCollision(projectile, this.aiWurm, this.terrain)) {
+      if (projectile.fuse <= 0 && handleProjectileWurmCollision(projectile, this.aiWurm, this.terrain)) {
         console.log('AI Wurm hit!');
         this.projectiles.splice(i, 1);
         this.removeFromCurrent(projectile);
         continue;
       }
+
       if (this.terrain.isColliding(projectile.x + projectile.radius, projectile.y + projectile.radius)) {
+        if (projectile.fuse > 0) {
+          projectile.x = prevX;
+          projectile.y = prevY;
+          projectile.dy = -projectile.dy * 0.5;
+          projectile.dx *= 0.7;
+        } else {
+          this.terrain.destroy(projectile.x + projectile.radius, projectile.y + projectile.radius, projectile.explosionRadius);
+          this.projectiles.splice(i, 1);
+          this.removeFromCurrent(projectile);
+          if (this.playerWurm.collidesWith(projectile)) {
+            this.playerWurm.takeDamage(projectile.damage);
+          }
+          if (this.aiWurm.collidesWith(projectile)) {
+            this.aiWurm.takeDamage(projectile.damage);
+          }
+          continue;
+        }
+      } else if (
+        projectile.x + projectile.radius * 2 < 0 ||
+        projectile.x > this.canvas.width ||
+        projectile.y > this.canvas.height
+      ) {
+        this.projectiles.splice(i, 1);
+        this.removeFromCurrent(projectile);
+        continue;
+      }
+
+      if (projectile.initialFuse > 0 && projectile.fuse <= 0) {
         this.terrain.destroy(projectile.x + projectile.radius, projectile.y + projectile.radius, projectile.explosionRadius);
         this.projectiles.splice(i, 1);
         this.removeFromCurrent(projectile);
@@ -94,13 +136,11 @@ export class Game {
         if (this.aiWurm.collidesWith(projectile)) {
           this.aiWurm.takeDamage(projectile.damage);
         }
-      } else if (
-        projectile.x + projectile.radius * 2 < 0 ||
-        projectile.x > this.canvas.width ||
-        projectile.y > this.canvas.height
-      ) {
-        this.projectiles.splice(i, 1);
-        this.removeFromCurrent(projectile);
+        continue;
+      }
+
+      if (projectile.fuse > 0) {
+        projectile.fuse--;
       }
     }
   }

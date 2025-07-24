@@ -3,12 +3,23 @@ import kontra from 'kontra/kontra.mjs';
 const { Sprite } = kontra;
 
 export class Projectile extends Sprite {
-  
+
   public radius: number;
   public damage: number;
   public explosionRadius: number;
+  public fuse: number;
+  public initialFuse: number;
 
-  constructor(x: number, y: number, dx: number, dy: number, radius: number, damage: number, explosionRadius: number) {
+  constructor(
+    x: number,
+    y: number,
+    dx: number,
+    dy: number,
+    radius: number,
+    damage: number,
+    explosionRadius: number,
+    fuse = 0
+  ) {
     super({
       x,
       y,
@@ -24,6 +35,8 @@ export class Projectile extends Sprite {
     this.radius = radius;
     this.damage = damage;
     this.explosionRadius = explosionRadius;
+    this.fuse = fuse;
+    this.initialFuse = fuse;
   }
 
   public update() {
