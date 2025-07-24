@@ -39,6 +39,7 @@ canvas {
 #controls span {
   display: inline-block; /* Changed to inline-block */
   margin-right: 5px;
+  min-width: 30px;
 }
 
 #controls input[type="range"] {
