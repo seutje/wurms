@@ -89,9 +89,8 @@ function startGame(seed?: number, playerIsAI = false, showUI = true) {
   let currentGameState = GameState.PLANNING;
   let whoseTurn: 'player' | 'ai' = 'player';
 
-  const { playerWurm, aiWurm, terrain, currentTurnProjectiles } = game;
   const initialAngleInput = document.getElementById('angle') as HTMLInputElement;
-  playerWurm.barrelAngle = 180 - parseFloat(initialAngleInput.value);
+  game.playerWurm.barrelAngle = 180 - parseFloat(initialAngleInput.value);
 
   // AI Model
   let aiModel: DQNModel | null = null;
@@ -125,7 +124,7 @@ function startGame(seed?: number, playerIsAI = false, showUI = true) {
     angleInput.addEventListener('input', () => {
       const angle = 180 - parseFloat(angleInput.value);
       angleValueSpan.textContent = angle.toString();
-      playerWurm.barrelAngle = angle;
+      game.playerWurm.barrelAngle = angle;
     });
     powerInput.addEventListener('input', () => {
       powerValueSpan.textContent = powerInput.value;
@@ -138,7 +137,7 @@ function startGame(seed?: number, playerIsAI = false, showUI = true) {
         const power = parseFloat(powerInput.value);
         const weapon = weaponSelect.value;
 
-        game.fire(playerWurm, weapon, angle, power);
+        game.fire(game.playerWurm, weapon, angle, power);
         soundManager.playSound('fire');
 
         currentGameState = GameState.EXECUTION;
@@ -157,11 +156,11 @@ function startGame(seed?: number, playerIsAI = false, showUI = true) {
   mainGameLoop = GameLoop({
     blur: true,
     update: () => {
-      playerWurm.update(terrain);
-      aiWurm.update(terrain);
+      game.playerWurm.update(game.terrain);
+      game.aiWurm.update(game.terrain);
 
-      const prevPlayer = playerWurm.health;
-      const prevAi = aiWurm.health;
+      const prevPlayer = game.playerWurm.health;
+      const prevAi = game.aiWurm.health;
 
       game.update();
 
@@ -169,31 +168,31 @@ function startGame(seed?: number, playerIsAI = false, showUI = true) {
         case GameState.PLANNING:
           if (playerIsAI && whoseTurn === 'player') {
             const { aiWeapon, aiAngle, aiPower } = getAiAction(
-              playerWurm,
-              aiWurm,
+              game.playerWurm,
+              game.aiWurm,
               aiModel
             );
-            game.fire(playerWurm, aiWeapon, aiAngle, aiPower);
+            game.fire(game.playerWurm, aiWeapon, aiAngle, aiPower);
             soundManager.playSound('fire');
             currentGameState = GameState.EXECUTION;
             whoseTurn = 'ai';
           }
           break;
         case GameState.EXECUTION:
-          if (playerWurm.health < prevPlayer || aiWurm.health < prevAi) {
+          if (game.playerWurm.health < prevPlayer || game.aiWurm.health < prevAi) {
             soundManager.playSound('explosion');
             soundManager.playSound('damage');
           }
 
-          if (currentTurnProjectiles.length === 0) { // Only transition when current turn's projectiles are resolved
+          if (game.currentTurnProjectiles.length === 0) { // Only transition when current turn's projectiles are resolved
             // Check win/loss conditions
-            if (playerWurm.health <= 0 && aiWurm.health <= 0) {
+            if (game.playerWurm.health <= 0 && game.aiWurm.health <= 0) {
               gameOverMessage.textContent = "Draw!";
               currentGameState = GameState.GAME_OVER;
-            } else if (playerWurm.health <= 0) {
+            } else if (game.playerWurm.health <= 0) {
               gameOverMessage.textContent = "AI Wins!";
               currentGameState = GameState.GAME_OVER;
-            } else if (aiWurm.health <= 0) {
+            } else if (game.aiWurm.health <= 0) {
               gameOverMessage.textContent = "Player Wins!";
               currentGameState = GameState.GAME_OVER;
             } else {
@@ -207,11 +206,11 @@ function startGame(seed?: number, playerIsAI = false, showUI = true) {
           break;
         case GameState.RESOLUTION:
           const { aiWeapon, aiAngle, aiPower } = getAiAction(
-            aiWurm,
-            playerWurm,
+            game.aiWurm,
+            game.playerWurm,
             aiModel
           );
-          game.fire(aiWurm, aiWeapon, aiAngle, aiPower);
+          game.fire(game.aiWurm, aiWeapon, aiAngle, aiPower);
           soundManager.playSound('fire');
 
           currentGameState = GameState.EXECUTION; // AI fires, so back to execution
@@ -237,8 +236,8 @@ function startGame(seed?: number, playerIsAI = false, showUI = true) {
       // Display health (for debugging/testing)
       context.fillStyle = 'white';
       context.font = '16px Arial';
-      context.fillText(`Player Health: ${playerWurm.health}`, 10, 20);
-      context.fillText(`AI Health: ${aiWurm.health}`, canvas.width - 150, 20);
+      context.fillText(`Player Health: ${game.playerWurm.health}`, 10, 20);
+      context.fillText(`AI Health: ${game.aiWurm.health}`, canvas.width - 150, 20);
     }
   } as any);
 
