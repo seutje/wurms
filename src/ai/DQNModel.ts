@@ -6,10 +6,12 @@ export class DQNModel {
   private inputShape: number[];
   private outputSize: number;
   private optimizer: tf.Optimizer;
+  private clipNorm: number;
 
-  constructor(inputShape: number[], outputSize: number) {
+  constructor(inputShape: number[], outputSize: number, clipNorm = 1) {
     this.inputShape = inputShape;
     this.outputSize = outputSize;
+    this.clipNorm = clipNorm;
     this.optimizer = tf.train.adam(0.0005);
     this.model = this.buildModel();
   }
@@ -80,7 +82,7 @@ export class DQNModel {
       return tf.sqrt(tf.addN(squares));
     });
     const normValue = globalNorm.dataSync()[0];
-    const scale = normValue > 1 ? 1 / normValue : 1;
+    const scale = normValue > this.clipNorm ? this.clipNorm / normValue : 1;
     const clipped: Record<string, tf.Tensor> = {};
     for (const key in grads) {
       clipped[key] = grads[key].mul(scale);
