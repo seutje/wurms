@@ -103,7 +103,19 @@ export class Game {
       const projectile = this.projectiles[i];
       const prevX = projectile.x;
       const prevY = projectile.y;
-      projectile.update();
+      if (typeof projectile.update === 'function') {
+        projectile.update();
+      }
+      if (
+        projectile.isGrenade &&
+        !(projectile instanceof Projectile) &&
+        typeof projectile.fuse === 'number'
+      ) {
+        projectile.fuse -= 1;
+        if (projectile.fuse <= 0) {
+          projectile.exploded = true;
+        }
+      }
       if (projectile.x < 0) {
         projectile.x = 0;
         projectile.dx = -projectile.dx;

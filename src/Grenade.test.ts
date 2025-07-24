@@ -91,9 +91,19 @@ describe('Grenade behavior', () => {
     const ctx = canvas.getContext('2d')!;
     const game = new Game(canvas, ctx);
 
-    const projectile = new Projectile(100, 100, 0, 0, 5, 10, 20);
-    projectile.isGrenade = true;
-    (projectile as any).fuse = 1;
+    const projectile: any = {
+      x: 100,
+      y: 100,
+      dx: 0,
+      dy: 0,
+      radius: 5,
+      damage: 10,
+      explosionRadius: 20,
+      isGrenade: true,
+      fuse: 1,
+      exploded: false,
+      update: vi.fn()
+    };
     game.projectiles.push(projectile);
     game.currentTurnProjectiles.push(projectile);
     vi.spyOn(game.terrain, 'isColliding').mockReturnValue(false);
