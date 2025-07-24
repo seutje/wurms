@@ -278,16 +278,16 @@ export class Game {
               this.terrain.getGroundHeight(center) - projectile.radius * 2;
             projectile.dy = 0;
             projectile.dx += slope * 0.1;
-            projectile.dx *= 0.95;
+            projectile.dx *= 0.9;
           } else if (horizontalCollision) {
-            projectile.dx = -projectile.dx * 0.3;
-            projectile.dy *= 0.7;
+            projectile.dx = -projectile.dx * 0.2;
+            projectile.dy *= 0.5;
           } else if (Math.abs(projectile.dx) > Math.abs(projectile.dy)) {
-            projectile.dx = -projectile.dx * 0.3;
-            projectile.dy *= 0.7;
+            projectile.dx = -projectile.dx * 0.2;
+            projectile.dy *= 0.5;
           } else {
-            projectile.dy = -projectile.dy * 0.5;
-            projectile.dx *= 0.7;
+            projectile.dy = -projectile.dy * 0.3;
+            projectile.dx *= 0.5;
           }
         } else {
           this.terrain.destroy(
