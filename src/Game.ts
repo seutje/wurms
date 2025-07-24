@@ -117,7 +117,8 @@ export class Game {
   }
 
   public fire(wurm: Wurm, weapon: string, angle: number, power: number) {
-    const { radius, damage, explosionRadius, fuse } = weaponProperties[weapon];
+    const { radius, damage, explosionRadius, fuse, cluster } =
+      weaponProperties[weapon];
     const radians = angle * Math.PI / 180;
     wurm.barrelAngle = angle;
     const offset = wurm.width / 2 + radius + 5;
@@ -134,7 +135,8 @@ export class Game {
       radius,
       damage,
       explosionRadius,
-      fuse
+      fuse,
+      cluster
     );
     this.projectiles.push(projectile);
     this.currentTurnProjectiles.push(projectile);
@@ -145,6 +147,42 @@ export class Game {
     const idx = this.currentTurnProjectiles.indexOf(projectile);
     if (idx > -1) {
       this.currentTurnProjectiles.splice(idx, 1);
+    }
+  }
+
+  private spawnClusters(projectile: Projectile) {
+    if (projectile.cluster <= 0) {
+      return;
+    }
+    const grenade = weaponProperties['grenade'];
+    for (let i = 0; i < projectile.cluster; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const startX =
+        projectile.x +
+        projectile.radius +
+        (Math.random() - 0.5) * projectile.radius -
+        grenade.radius;
+      const startY =
+        projectile.y +
+        projectile.radius -
+        Math.random() * projectile.radius -
+        grenade.radius;
+      const force = projectile.explosionRadius * 0.05;
+      const velX = Math.cos(angle) * force;
+      const velY = Math.sin(angle) * force;
+      const clusterProjectile = new Projectile(
+        startX,
+        startY,
+        velX,
+        velY,
+        grenade.radius,
+        grenade.damage * 0.25,
+        grenade.explosionRadius,
+        grenade.fuse,
+        0
+      );
+      this.projectiles.push(clusterProjectile);
+      this.currentTurnProjectiles.push(clusterProjectile);
     }
   }
 
@@ -180,6 +218,7 @@ export class Game {
           projectile.explosionRadius,
           projectile.damage
         );
+        this.spawnClusters(projectile);
         this.projectiles.splice(i, 1);
         this.removeFromCurrent(projectile);
         continue;
@@ -199,6 +238,7 @@ export class Game {
           projectile.explosionRadius,
           projectile.damage
         );
+        this.spawnClusters(projectile);
         this.projectiles.splice(i, 1);
         this.removeFromCurrent(projectile);
         continue;
@@ -242,16 +282,17 @@ export class Game {
               projectile.explosionRadius
             )
           );
-          this.applyExplosionDamage(
-            projectile.x + projectile.radius,
-            projectile.y + projectile.radius,
-            projectile.explosionRadius,
-            projectile.damage
-          );
-          this.projectiles.splice(i, 1);
-          this.removeFromCurrent(projectile);
-          continue;
-        }
+        this.applyExplosionDamage(
+          projectile.x + projectile.radius,
+          projectile.y + projectile.radius,
+          projectile.explosionRadius,
+          projectile.damage
+        );
+        this.spawnClusters(projectile);
+        this.projectiles.splice(i, 1);
+        this.removeFromCurrent(projectile);
+        continue;
+      }
       } else if (
         projectile.x + projectile.radius * 2 < 0 ||
         projectile.x > this.canvas.width ||
@@ -277,6 +318,7 @@ export class Game {
           projectile.explosionRadius,
           projectile.damage
         );
+        this.spawnClusters(projectile);
         this.projectiles.splice(i, 1);
         this.removeFromCurrent(projectile);
         continue;
