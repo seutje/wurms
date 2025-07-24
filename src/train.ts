@@ -112,7 +112,7 @@ async function train() {
       const aiWon = playerWurm.health <= 0 && aiWurm.health > 0;
       const playerWon = aiWurm.health <= 0 && playerWurm.health > 0;
 
-      const reward = calculateReward(aiWurm, playerWurm, hitEnemy, hitSelf, gameEnded, playerWon, aiWon, distanceDelta);
+      const reward = calculateReward(aiWurm, playerWurm, hitEnemy, hitSelf, playerWon, aiWon, distanceDelta);
       totalReward += reward;
 
       const experience: Experience = {

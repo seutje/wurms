@@ -5,7 +5,6 @@ export function calculateReward(
   _aiWurm: Wurm,
   hitEnemy: boolean,
   hitSelf: boolean,
-  gameEnded: boolean,
   playerWon: boolean,
   aiWon: boolean,
   distanceDelta: number
@@ -31,7 +30,7 @@ export function calculateReward(
   }
 
   // Small negative reward for missing a shot (if no hit occurred)
-  if (!hitEnemy && !hitSelf && gameEnded) { // Assuming gameEnded implies a turn ended without a hit
+  if (!hitEnemy && !hitSelf) {
     reward -= 10;
   }
 

@@ -241,7 +241,7 @@ function startGame(seed?: number, playerIsAI = false, showUI = true) {
       context.fillText(`Player Health: ${playerWurm.health}`, 10, 20);
       context.fillText(`AI Health: ${aiWurm.health}`, canvas.width - 150, 20);
     }
-  });
+  } as any);
 
   mainGameLoop.start();
 }
