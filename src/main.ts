@@ -10,6 +10,7 @@ import { getObservation } from './ai/ObservationSpace.js';
 import { WEAPON_CHOICES } from './ai/ActionSpace.js';
 import { weaponProperties } from './WeaponProperties.js';
 import { SoundManager } from './SoundManager.js';
+import { Explosion } from './Explosion.js';
 
 // Sound Manager
 const soundManager = new SoundManager();
@@ -209,6 +210,7 @@ let aiDemoTerrain: Terrain;
 let aiDemoWurm1: Wurm;
 let aiDemoWurm2: Wurm;
 let aiDemoProjectiles: Projectile[] = [];
+let aiDemoExplosions: Explosion[] = [];
 let aiDemoTurn: 'wurm1' | 'wurm2' = 'wurm1';
 
 function initAiDemo() {
@@ -221,6 +223,7 @@ function initAiDemo() {
     'yellow'
   );
   aiDemoProjectiles = [];
+  aiDemoExplosions = [];
   aiDemoTurn = 'wurm1';
 }
 
@@ -268,10 +271,23 @@ const aiDemoLoop = GameLoop({
       if (aiDemoTerrain.isColliding(projectile.x + projectile.radius, projectile.y + projectile.radius)) {
         console.log(`AI Demo Projectile removed: Terrain collision at x: ${projectile.x}, y: ${projectile.y}, radius: ${projectile.radius}`);
         aiDemoTerrain.destroy(projectile.x + projectile.radius, projectile.y + projectile.radius, projectile.explosionRadius);
+        aiDemoExplosions.push(new Explosion(
+          projectile.x + projectile.radius,
+          projectile.y + projectile.radius,
+          projectile.explosionRadius
+        ));
         aiDemoProjectiles.splice(i, 1);
         soundManager.playSound('explosion');
       } else if (projectile.x + (projectile.radius * 2) < 0 || projectile.x > aiDemoCanvas.width || projectile.y + (projectile.radius * 2) < 0 || projectile.y > aiDemoCanvas.height) {
         aiDemoProjectiles.splice(i, 1);
+      }
+    }
+
+    for (let i = aiDemoExplosions.length - 1; i >= 0; i--) {
+      const explosion = aiDemoExplosions[i];
+      explosion.update();
+      if (explosion.isDone()) {
+        aiDemoExplosions.splice(i, 1);
       }
     }
   },
@@ -282,6 +298,9 @@ const aiDemoLoop = GameLoop({
     aiDemoWurm2.draw();
     for (const projectile of aiDemoProjectiles) {
       projectile.render();
+    }
+    for (const explosion of aiDemoExplosions) {
+      explosion.draw(aiDemoContext);
     }
   }
 });
