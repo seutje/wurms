@@ -55,7 +55,7 @@ export class Game {
     this.terrain = new Terrain(canvas.width, canvas.height, context);
     const [playerX, aiX] = this.getSpawnPositions();
     this.playerWurm = new Wurm(playerX, this.terrain.getGroundHeight(playerX), 100, 'blue');
-    this.aiWurm = new Wurm(aiX, this.terrain.getGroundHeight(aiX), 100, 'green');
+    this.aiWurm = new Wurm(aiX, this.terrain.getGroundHeight(aiX), 100, 'red');
   }
 
   public reset() {
