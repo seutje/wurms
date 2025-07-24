@@ -23,8 +23,8 @@ export class DQNModel {
 
   private buildModel(): tf.LayersModel {
     const model = tf.sequential();
-    model.add(tf.layers.dense({ units: 64, activation: 'relu', inputShape: this.inputShape }));
-    model.add(tf.layers.dense({ units: 64, activation: 'relu' }));
+    model.add(tf.layers.dense({ units: 16, activation: 'relu', inputShape: this.inputShape }));
+    model.add(tf.layers.dense({ units: 16, activation: 'relu' }));
     model.add(tf.layers.dense({ units: this.outputSize })); // Output for Q-values
     model.compile({ optimizer: this.optimizer, loss: 'meanSquaredError' });
     return model;
