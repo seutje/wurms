@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { Grenade } from './Grenade.js';
+import { Projectile } from './Projectile.js';
 import { Game } from './Game.js';
 
 vi.mock('kontra/kontra.mjs', async () => {
@@ -74,6 +75,27 @@ describe('Grenade behavior', () => {
     (grenade as any).isFuseExpired = undefined;
     game.projectiles.push(grenade);
     game.currentTurnProjectiles.push(grenade);
+    vi.spyOn(game.terrain, 'isColliding').mockReturnValue(false);
+    const destroySpy = vi.spyOn(game.terrain, 'destroy');
+
+    game.update();
+
+    expect(game.projectiles.length).toBe(0);
+    expect(destroySpy).toHaveBeenCalled();
+  });
+
+  it('ticks fuse on non-Grenade instances', () => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 800;
+    canvas.height = 600;
+    const ctx = canvas.getContext('2d')!;
+    const game = new Game(canvas, ctx);
+
+    const projectile = new Projectile(100, 100, 0, 0, 5, 10, 20);
+    projectile.isGrenade = true;
+    (projectile as any).fuse = 1;
+    game.projectiles.push(projectile);
+    game.currentTurnProjectiles.push(projectile);
     vi.spyOn(game.terrain, 'isColliding').mockReturnValue(false);
     const destroySpy = vi.spyOn(game.terrain, 'destroy');
 

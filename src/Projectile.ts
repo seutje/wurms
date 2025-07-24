@@ -8,6 +8,8 @@ export class Projectile extends Sprite {
   public damage: number;
   public explosionRadius: number;
   public isGrenade = false;
+  public fuse = 0;
+  public exploded = false;
 
   constructor(x: number, y: number, dx: number, dy: number, radius: number, damage: number, explosionRadius: number) {
     super({
@@ -29,5 +31,11 @@ export class Projectile extends Sprite {
 
   public update() {
     this.advance();
+    if (this.isGrenade && typeof this.fuse === 'number') {
+      this.fuse--;
+      if (this.fuse <= 0) {
+        this.exploded = true;
+      }
+    }
   }
 }
