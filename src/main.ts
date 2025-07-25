@@ -25,6 +25,9 @@ const gameOverMessage = document.getElementById('game-over-message') as HTMLElem
 const startGameButton = document.getElementById('start-game-button') as HTMLButtonElement;
 const playAgainButton = document.getElementById('play-again-button') as HTMLButtonElement;
 
+const seedParam = new URLSearchParams(window.location.search).get('seed');
+const urlSeed = seedParam ? parseInt(seedParam, 10) : undefined;
+
 function getAiAction(
   shooter: Wurm,
   target: Wurm,
@@ -252,9 +255,7 @@ startGameButton.addEventListener('click', () => {
   if (mainGameLoop) {
     mainGameLoop.stop();
   }
-  const param = new URLSearchParams(window.location.search).get('seed');
-  const seed = param ? parseInt(param, 10) : undefined;
-  startGame(seed, false, true);
+  startGame(urlSeed, false, true);
 });
 
 playAgainButton.addEventListener('click', () => {
@@ -265,10 +266,10 @@ playAgainButton.addEventListener('click', () => {
   if (mainGameLoop) {
     mainGameLoop.stop();
   }
-  startGame(undefined, true, false);
+  startGame(urlSeed, true, false);
 });
 
-startGame(undefined, true, false);
+startGame(urlSeed, true, false);
 
 
 
