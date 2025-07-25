@@ -2,6 +2,7 @@ import { JSDOM } from 'jsdom';
 import * as tf from '@tensorflow/tfjs-core';
 import '@tensorflow/tfjs-node'; // Use tfjs-node for headless environment
 import { promises as fs } from 'fs';
+import seedrandom from 'seedrandom';
 
 import { init } from './kontra.mock.js';
 import { Game } from './Game.js';
@@ -17,6 +18,7 @@ const dom = new JSDOM(`<!DOCTYPE html><body><canvas id="game"></canvas></body>`)
 (global as any).document = dom.window.document;
 (global as any).HTMLCanvasElement = dom.window.HTMLCanvasElement;
 (global as any).Image = dom.window.Image;
+seedrandom('42', { global: true });
 
 const canvas = dom.window.document.getElementById('game') as HTMLCanvasElement;
 canvas.width = 800;
