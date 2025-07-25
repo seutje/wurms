@@ -112,6 +112,25 @@ export class SimpleModel {
     }
   }
 
+  /**
+   * Update the model based on the received reward for a taken action.
+   * The network is nudged towards the sampled action scaled by the reward.
+   */
+  trainWithReward(
+    input: [number, number],
+    action: [number, number],
+    reward: number
+  ) {
+    const prediction = this.predict(input);
+    const target: [number, number] = [
+      prediction[0] + reward * (action[0] - prediction[0]),
+      prediction[1] + reward * (action[1] - prediction[1]),
+    ];
+    target[0] = Math.max(-1, Math.min(1, target[0]));
+    target[1] = Math.max(-1, Math.min(1, target[1]));
+    this.trainSingle(input, target);
+  }
+
   async save(path: string) {
     const data = {
       w1: this.w1,
