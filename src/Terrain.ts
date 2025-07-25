@@ -79,6 +79,15 @@ export class Terrain extends GameObject {
     return baseHeight + total;
   };
 
+  public getSlope = (x: number): number => {
+    const delta = 1;
+    const x1 = Math.max(0, Math.min(this.width - 1, x - delta));
+    const x2 = Math.max(0, Math.min(this.width - 1, x + delta));
+    const h1 = this.getGroundHeight(x1);
+    const h2 = this.getGroundHeight(x2);
+    return (h2 - h1) / (x2 - x1);
+  };
+
   private generateNoiseParameters = () => {
     const octaves = 4;
     for (let i = 0; i < octaves; i++) {

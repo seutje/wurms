@@ -7,26 +7,24 @@ vi.mock('kontra/kontra.mjs', async () => {
   return { default: { Sprite: mod.MockSprite, GameObject: mod.MockGameObject, init: mod.init } };
 });
 
-describe('Grenade fuse behavior', () => {
-  it('bounces then explodes when fuse runs out', () => {
+describe('Projectile terrain slope behavior', () => {
+  it('rolls down a gentle slope', () => {
     const canvas = document.createElement('canvas');
     canvas.width = 800;
     canvas.height = 600;
     const ctx = canvas.getContext('2d')!;
     const game = new Game(canvas, ctx);
 
-    const projectile = new Projectile(100, 100, 0, 1, 5, 0, 0, 1);
+    const projectile = new Projectile(100, 100, 1, 0.2, 5, 0, 0, 1);
     game.projectiles.push(projectile);
     game.currentTurnProjectiles.push(projectile);
 
     vi.spyOn(game.terrain, 'isColliding').mockReturnValue(true);
-    vi.spyOn(game.terrain, 'getSlope').mockReturnValue(0);
-    game.update();
-    expect(projectile.dy).toBe(-0.5);
-    expect(game.projectiles.length).toBe(1);
+    vi.spyOn(game.terrain, 'getSlope').mockReturnValue(0.2);
 
-    (game.terrain.isColliding as any).mockReturnValue(false);
     game.update();
-    expect(game.projectiles.length).toBe(0);
+
+    expect(projectile.dy).toBe(0);
+    expect(projectile.dx).toBeCloseTo(0.936, 3);
   });
 });

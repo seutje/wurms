@@ -259,28 +259,22 @@ export class Game {
 
       if (this.terrain.isColliding(projectile.x + projectile.radius, projectile.y + projectile.radius)) {
         if (projectile.fuse > 0) {
-          const verticalCollision = this.terrain.isColliding(
-            prevX + projectile.radius,
-            projectile.y + projectile.radius
-          );
-          const horizontalCollision = this.terrain.isColliding(
-            projectile.x + projectile.radius,
-            prevY + projectile.radius
-          );
           projectile.x = prevX;
           projectile.y = prevY;
-          if (horizontalCollision && !verticalCollision) {
-            projectile.dx = -projectile.dx * 0.5;
-            projectile.dy *= 0.7;
-          } else if (verticalCollision && !horizontalCollision) {
-            projectile.dy = -projectile.dy * 0.5;
-            projectile.dx *= 0.7;
-          } else if (Math.abs(projectile.dx) > Math.abs(projectile.dy)) {
-            projectile.dx = -projectile.dx * 0.5;
-            projectile.dy *= 0.7;
+          const slope = this.terrain.getSlope(projectile.x + projectile.radius);
+          const normalX = -slope;
+          const normalY = 1;
+          const len = Math.hypot(normalX, normalY);
+          const nx = normalX / len;
+          const ny = normalY / len;
+          if (Math.abs(slope) < 0.3 && Math.abs(projectile.dy) < 1) {
+            projectile.dy = 0;
+            projectile.dx += slope * 0.2;
+            projectile.dx *= 0.9;
           } else {
-            projectile.dy = -projectile.dy * 0.5;
-            projectile.dx *= 0.7;
+            const dot = projectile.dx * nx + projectile.dy * ny;
+            projectile.dx = (projectile.dx - 2 * dot * nx) * 0.5;
+            projectile.dy = (projectile.dy - 2 * dot * ny) * 0.5;
           }
         } else {
           this.terrain.destroy(
