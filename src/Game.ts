@@ -282,6 +282,26 @@ export class Game {
             projectile.dy = -projectile.dy * 0.5;
             projectile.dx *= 0.7;
           }
+          const onGround = this.terrain.isColliding(
+            projectile.x + projectile.radius,
+            projectile.y + projectile.radius + 1
+          );
+          if (onGround) {
+            const centerX = projectile.x + projectile.radius;
+            const left = Math.max(0, Math.floor(centerX - 1));
+            const right = Math.min(
+              this.canvas.width - 1,
+              Math.floor(centerX + 1)
+            );
+            const slope =
+              this.terrain.getGroundHeight(right) -
+              this.terrain.getGroundHeight(left);
+            projectile.dx += slope * 0.05;
+            projectile.dx *= 0.98;
+            if (slope !== 0) {
+              projectile.dy = 0;
+            }
+          }
         } else {
           this.terrain.destroy(
             projectile.x + projectile.radius,
