@@ -14,7 +14,7 @@ const dom = new JSDOM(`<!DOCTYPE html><body><canvas id="game"></canvas></body>`)
 (global as any).document = dom.window.document;
 (global as any).HTMLCanvasElement = dom.window.HTMLCanvasElement;
 (global as any).Image = dom.window.Image;
-const seed = 42;
+const seed = 123;
 
 const canvas = dom.window.document.getElementById('game') as HTMLCanvasElement;
 canvas.width = 800;
