@@ -1,11 +1,11 @@
 // Import kontra from its ESM build for compatibility with both browser and Node
 import kontra from 'kontra/kontra.mjs';
 const { init, GameLoop } = kontra;
-import { Wurm } from './Wurm.js';
 import { Game } from './Game.js';
 
 import { SoundManager } from './SoundManager.js';
 import { setupKeyboardControls } from './KeyboardControls.js';
+import { getAiAction } from './BallisticAI.js';
 
 // Sound Manager
 const soundManager = new SoundManager();
@@ -24,40 +24,6 @@ const playAgainButton = document.getElementById('play-again-button') as HTMLButt
 
 const seedParam = new URLSearchParams(window.location.search).get('seed');
 const urlSeed = seedParam ? parseInt(seedParam, 10) : undefined;
-
-function getAiAction(shooter: Wurm, target: Wurm) {
-  const g = 0.1;
-  const power = 60;
-  const v = power * 0.15;
-
-  const shooterX = shooter.x + shooter.width / 2;
-  const shooterY = shooter.y;
-  const targetX = target.x + target.width / 2;
-  const targetY = target.y;
-
-  const dx = targetX - shooterX;
-  const dy = shooterY - targetY;
-
-  let angleRad: number;
-  if (dx === 0) {
-    angleRad = Math.PI / 2;
-  } else {
-    const discriminant = v ** 4 - g * (g * dx ** 2 + 2 * dy * v ** 2);
-    if (discriminant <= 0) {
-      angleRad = Math.PI / 4;
-    } else {
-      angleRad = Math.atan((v ** 2 + Math.sqrt(discriminant)) / (g * dx));
-    }
-  }
-
-  let angleDeg = (angleRad * 180) / Math.PI;
-  if (dx < 0) {
-    angleDeg = 180 - angleDeg;
-  }
-
-  return { aiWeapon: 'mortar', aiAngle: angleDeg, aiPower: power };
-}
-
 
 
 // Main Game Initialization and Loop
