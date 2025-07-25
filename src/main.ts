@@ -175,6 +175,7 @@ function startGame(seed?: number, playerIsAI = false, showUI = true) {
             removeKeyboard();
           } else {
             game.reset();
+            resetAiShotCount();
             currentGameState = GameState.PLANNING;
             whoseTurn = 'player';
           }
