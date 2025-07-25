@@ -7,6 +7,8 @@ import { weaponProperties } from './WeaponProperties.js';
 import { handleProjectileWurmCollision } from './collision.js';
 import { Explosion } from './Explosion.js';
 
+const CLUSTER_FUSE = 120;
+
 export class Game {
   public terrain: Terrain;
   public playerWurm: Wurm;
@@ -208,7 +210,7 @@ export class Game {
         grenade.radius,
         grenade.damage * 0.25,
         grenade.explosionRadius,
-        grenade.fuse,
+        CLUSTER_FUSE,
         0
       );
       this.projectiles.push(clusterProjectile);
