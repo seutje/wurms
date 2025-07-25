@@ -13,6 +13,8 @@ export interface Observation {
 
 const MAX_DISTANCE = 1000;
 
+// Note: "playerWurm" is the target and "aiWurm" is the observer.
+// The observation describes the position of the target relative to the AI.
 export function getObservation(playerWurm: Wurm, aiWurm: Wurm): Observation {
   const dx = playerWurm.x - aiWurm.x;
   const dy = playerWurm.y - aiWurm.y;
