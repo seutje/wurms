@@ -3,9 +3,8 @@ import kontra from 'kontra/kontra.mjs';
 const { init, GameLoop } = kontra;
 import { Wurm } from './Wurm.js';
 import { Game } from './Game.js';
-import { DQNModel } from './ai/DQNModel.js';
+import { SimpleModel } from './ai/SimpleModel.js';
 import { getObservation } from './ai/ObservationSpace.js';
-import { WEAPON_CHOICES } from './ai/ActionSpace.js';
 import { weaponProperties } from './WeaponProperties.js';
 import { SoundManager } from './SoundManager.js';
 import { setupKeyboardControls } from './KeyboardControls.js';
@@ -31,7 +30,7 @@ const urlSeed = seedParam ? parseInt(seedParam, 10) : undefined;
 function getAiAction(
   shooter: Wurm,
   target: Wurm,
-  model: DQNModel | null
+  model: SimpleModel | null
 ) {
   let aiAngle: number;
   let aiPower: number;
@@ -39,19 +38,13 @@ function getAiAction(
 
   if (model) {
     const observation = getObservation(target, shooter);
-    const prediction = model.predict(observation);
-    const argMax = prediction.argMax(-1);
-    const actionIndex = argMax.dataSync()[0];
-    argMax.dispose();
-    prediction.dispose();
-
-    const weaponIndex = Math.floor(actionIndex / (10 * 10));
-    const angleBin = Math.floor((actionIndex % 100) / 10);
-    const powerBin = actionIndex % 10;
-
-    aiWeapon = WEAPON_CHOICES[weaponIndex];
-    aiAngle = angleBin * 18;
-    aiPower = powerBin * 10;
+    const [angleNorm, powerNorm] = model.predict([
+      observation.angleToTarget,
+      observation.distanceToTarget,
+    ]);
+    aiWeapon = 'bazooka';
+    aiAngle = ((angleNorm + 1) / 2) * 180;
+    aiPower = Math.max(0, Math.min(100, powerNorm * 100));
   } else {
     aiAngle = Math.random() * 180;
     aiPower = Math.random() * 100;
@@ -96,12 +89,12 @@ function startGame(seed?: number, playerIsAI = false, showUI = true) {
   game.playerWurm.barrelAngle = 180 - parseFloat(initialAngleInput.value);
 
   // AI Model
-  let aiModel: DQNModel | null = null;
+  let aiModel: SimpleModel | null = null;
   
 
   async function loadModel() {
     try {
-      aiModel = await DQNModel.load('/models/dqn-model/model.json');
+      aiModel = await SimpleModel.load('/models/simple-model.json');
       console.log('AI Model loaded successfully.');
     } catch (error) {
       console.warn('Could not load AI model, using random AI.', error);
