@@ -88,8 +88,11 @@ async function evaluate(numEpisodes = 1) {
       const playerWon = aiWurm.health <= 0 && playerWurm.health > 0;
       const gameEnded = aiWon || playerWon;
 
-      const reward = calculateReward(aiWurm, playerWurm, hitEnemy, hitSelf, playerWon, aiWon, distanceDelta);
-      episodeReward += reward;
+      let reward = 0;
+      if (whoseTurn === 'ai') {
+        reward = calculateReward(aiWurm, playerWurm, hitEnemy, hitSelf, playerWon, aiWon, distanceDelta);
+        episodeReward += reward;
+      }
 
       if (gameEnded) {
         done = true;

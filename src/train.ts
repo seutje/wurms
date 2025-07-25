@@ -108,28 +108,31 @@ async function train() {
       const weaponName = WEAPON_CHOICES[weaponIdx];
       game.fire(aiWurm, weaponName, angle, power);
 
-      const dummy = getDummyPlayerShot();
-      game.fire(playerWurm, dummy.weapon, dummy.angle, dummy.power);
-
       game.simulateUntilProjectilesResolve();
 
-      const nextObservation = getObservation(playerWurm, aiWurm);
-      const newDistance = Math.abs(aiWurm.x - playerWurm.x);
-      const distanceDelta = newDistance - prevDistance;
-      prevDistance = newDistance;
-
-      // Determine next state and reward
-
-      // Apply damage to wurms (already done in the projectile loop)
+      const afterAiDistance = Math.abs(aiWurm.x - playerWurm.x);
+      const distanceDelta = afterAiDistance - prevDistance;
 
       const hitEnemy = playerWurm.health < prevPlayerHealth;
       const hitSelf = aiWurm.health < prevAiHealth;
-      const gameEnded = playerWurm.health <= 0 || aiWurm.health <= 0;
       const aiWon = playerWurm.health <= 0 && aiWurm.health > 0;
       const playerWon = aiWurm.health <= 0 && playerWurm.health > 0;
 
       const reward = calculateReward(aiWurm, playerWurm, hitEnemy, hitSelf, playerWon, aiWon, distanceDelta);
       totalReward += reward;
+
+      let gameEnded = aiWon || playerWon;
+
+      if (!gameEnded) {
+        const dummy = getDummyPlayerShot();
+        game.fire(playerWurm, dummy.weapon, dummy.angle, dummy.power);
+        game.simulateUntilProjectilesResolve();
+        gameEnded = playerWurm.health <= 0 || aiWurm.health <= 0;
+      }
+
+      const nextObservation = getObservation(playerWurm, aiWurm);
+      const newDistance = Math.abs(aiWurm.x - playerWurm.x);
+      prevDistance = newDistance;
 
       const experience: Experience = {
         observation,
