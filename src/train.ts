@@ -71,7 +71,7 @@ async function train() {
     let episodeLossCount = 0;
 
     while (!done) {
-      const observation = getObservation(aiWurm, playerWurm);
+      const observation = getObservation(playerWurm, aiWurm);
       const qValues = dqnModel.predict(observation);
       const qArr = (qValues.arraySync() as number[][])[0];
       const stepQMin = Math.min(...qArr);
@@ -110,7 +110,7 @@ async function train() {
 
       game.simulateUntilProjectilesResolve();
 
-      const nextObservation = getObservation(aiWurm, playerWurm);
+      const nextObservation = getObservation(playerWurm, aiWurm);
       const newDistance = Math.abs(aiWurm.x - playerWurm.x);
       const distanceDelta = newDistance - prevDistance;
       prevDistance = newDistance;
