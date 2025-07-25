@@ -1,10 +1,8 @@
 import { JSDOM } from 'jsdom';
-import * as tf from '@tensorflow/tfjs-core';
-import '@tensorflow/tfjs-node';
 
 import { init } from './kontra.mock.js';
 import { Game } from './Game.js';
-import { DQNModel } from './ai/DQNModel.js';
+import { SimpleModel } from './ai/SimpleModel.js';
 import { getObservation } from './ai/ObservationSpace.js';
 import { WEAPON_CHOICES } from './ai/ActionSpace.js';
 import { calculateReward } from './ai/RewardFunction.js';
@@ -32,7 +30,7 @@ function getDummyPlayerShot() {
 }
 
 async function evaluate(numEpisodes = 1) {
-  const model = await DQNModel.load('file://./src/models/dqn-model/model.json');
+  const model = await SimpleModel.load('./src/models/simple-model.json');
   let totalReward = 0;
 
   for (let episode = 0; episode < numEpisodes; episode++) {
@@ -49,21 +47,11 @@ async function evaluate(numEpisodes = 1) {
       const prevPlayerHealth = playerWurm.health;
 
       if (whoseTurn === 'ai') {
-        const observation = getObservation(playerWurm, aiWurm);
-        const qValues = model.predict(observation) as tf.Tensor;
-        const argMax = tf.argMax(qValues);
-        const actionIndex = argMax.dataSync()[0];
-        qValues.dispose();
-        argMax.dispose();
-
-        const weaponIdx = Math.floor(actionIndex / (10 * 10));
-        const angleBin = Math.floor((actionIndex % 100) / 10);
-        const powerBin = actionIndex % 10;
-        const angle = angleBin * 18;
-        const power = powerBin * 10;
-
-        const weaponName = WEAPON_CHOICES[weaponIdx];
-        game.fire(aiWurm, weaponName, angle, power);
+        const obs = getObservation(playerWurm, aiWurm);
+        const [aNorm, pNorm] = model.predict([obs.angleToTarget, obs.distanceToTarget]);
+        const angle = ((aNorm + 1) / 2) * 180;
+        const power = Math.max(0, Math.min(100, pNorm * 100));
+        game.fire(aiWurm, 'bazooka', angle, power);
       } else {
         const dummy = getDummyPlayerShot();
         game.fire(playerWurm, dummy.weapon, dummy.angle, dummy.power);
