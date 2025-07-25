@@ -39,45 +39,59 @@ async function evaluate(numEpisodes = 1) {
     let done = false;
     let episodeReward = 0;
     let prevDistance = Math.abs(aiWurm.x - playerWurm.x);
+    let whoseTurn: 'player' | 'ai' = 'player';
 
     while (!done) {
-      const observation = getObservation(playerWurm, aiWurm);
-      const qValues = model.predict(observation) as tf.Tensor;
-      const argMax = tf.argMax(qValues);
-      const actionIndex = argMax.dataSync()[0];
-      qValues.dispose();
-      argMax.dispose();
-
-      const weaponIdx = Math.floor(actionIndex / 100);
-      const angleBin = Math.floor((actionIndex % 100) / 10);
-      const powerBin = actionIndex % 10;
-      const angle = angleBin * 18;
-      const power = powerBin * 10;
-
       const prevAiHealth = aiWurm.health;
       const prevPlayerHealth = playerWurm.health;
-      const weaponName = WEAPON_CHOICES[weaponIdx];
 
-      game.fire(aiWurm, weaponName, angle, power);
-      const dummy = getDummyPlayerShot();
-      game.fire(playerWurm, dummy.weapon, dummy.angle, dummy.power);
+      if (whoseTurn === 'ai') {
+        const observation = getObservation(playerWurm, aiWurm);
+        const qValues = model.predict(observation) as tf.Tensor;
+        const argMax = tf.argMax(qValues);
+        const actionIndex = argMax.dataSync()[0];
+        qValues.dispose();
+        argMax.dispose();
+
+        const weaponIdx = Math.floor(actionIndex / (10 * 10));
+        const angleBin = Math.floor((actionIndex % 100) / 10);
+        const powerBin = actionIndex % 10;
+        const angle = angleBin * 18;
+        const power = powerBin * 10;
+
+        const weaponName = WEAPON_CHOICES[weaponIdx];
+        game.fire(aiWurm, weaponName, angle, power);
+      } else {
+        const dummy = getDummyPlayerShot();
+        game.fire(playerWurm, dummy.weapon, dummy.angle, dummy.power);
+      }
+
       game.simulateUntilProjectilesResolve();
 
       const newDistance = Math.abs(aiWurm.x - playerWurm.x);
       const distanceDelta = newDistance - prevDistance;
       prevDistance = newDistance;
 
-      const hitEnemy = playerWurm.health < prevPlayerHealth;
-      const hitSelf = aiWurm.health < prevAiHealth;
-      const gameEnded = playerWurm.health <= 0 || aiWurm.health <= 0;
+      const hitEnemy =
+        whoseTurn === 'ai'
+          ? playerWurm.health < prevPlayerHealth
+          : aiWurm.health < prevAiHealth;
+      const hitSelf =
+        whoseTurn === 'ai'
+          ? aiWurm.health < prevAiHealth
+          : playerWurm.health < prevPlayerHealth;
+
       const aiWon = playerWurm.health <= 0 && aiWurm.health > 0;
       const playerWon = aiWurm.health <= 0 && playerWurm.health > 0;
+      const gameEnded = aiWon || playerWon;
 
       const reward = calculateReward(aiWurm, playerWurm, hitEnemy, hitSelf, playerWon, aiWon, distanceDelta);
       episodeReward += reward;
 
       if (gameEnded) {
         done = true;
+      } else {
+        whoseTurn = whoseTurn === 'ai' ? 'player' : 'ai';
       }
     }
 
