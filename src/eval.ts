@@ -1,7 +1,6 @@
 import { JSDOM } from 'jsdom';
 import * as tf from '@tensorflow/tfjs-core';
 import '@tensorflow/tfjs-node';
-import seedrandom from 'seedrandom';
 
 import { init } from './kontra.mock.js';
 import { Game } from './Game.js';
@@ -15,14 +14,14 @@ const dom = new JSDOM(`<!DOCTYPE html><body><canvas id="game"></canvas></body>`)
 (global as any).document = dom.window.document;
 (global as any).HTMLCanvasElement = dom.window.HTMLCanvasElement;
 (global as any).Image = dom.window.Image;
-seedrandom('42', { global: true });
+const seed = 42;
 
 const canvas = dom.window.document.getElementById('game') as HTMLCanvasElement;
 canvas.width = 800;
 canvas.height = 600;
 init(canvas);
 
-const game = new Game(canvas, canvas.getContext('2d')!);
+const game = new Game(canvas, canvas.getContext('2d')!, seed);
 const { playerWurm, aiWurm } = game;
 
 function getDummyPlayerShot() {
