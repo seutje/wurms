@@ -17,16 +17,17 @@ export class Game {
   private canvas: HTMLCanvasElement;
   private context: CanvasRenderingContext2D;
   private readonly spawnOffset = 20;
+  private spawnRandom: () => number;
 
   private getSpawnPositions() {
     const edgeBuffer = 20;
     const minDistance = 150;
     const range = this.canvas.width - edgeBuffer * 2;
-    let playerX = edgeBuffer + Math.random() * range;
-    let aiX = edgeBuffer + Math.random() * range;
+    let playerX = edgeBuffer + this.spawnRandom() * range;
+    let aiX = edgeBuffer + this.spawnRandom() * range;
     let attempts = 0;
     while (Math.abs(playerX - aiX) < minDistance && attempts < 100) {
-      aiX = edgeBuffer + Math.random() * range;
+      aiX = edgeBuffer + this.spawnRandom() * range;
       attempts++;
     }
     return [playerX, aiX] as const;
@@ -82,6 +83,15 @@ export class Game {
 
   private mapSeed?: number;
 
+  private mulberry32 = (a: number) => {
+    return () => {
+      let t = (a += 0x6d2b79f5);
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  };
+
   constructor(
     canvas: HTMLCanvasElement,
     context: CanvasRenderingContext2D,
@@ -91,6 +101,9 @@ export class Game {
     this.context = context;
     init(canvas);
     this.mapSeed = seed;
+    const spawnSeed =
+      this.mapSeed !== undefined ? this.mapSeed + 1 : Math.floor(Math.random() * 1e9);
+    this.spawnRandom = this.mulberry32(spawnSeed);
     this.terrain = new Terrain(canvas.width, canvas.height, context, seed);
     const [playerX, aiX] = this.getSpawnPositions();
     this.playerWurm = new Wurm(
@@ -109,6 +122,9 @@ export class Game {
 
   public reset(seed?: number) {
     this.mapSeed = seed ?? this.mapSeed;
+    const spawnSeed =
+      this.mapSeed !== undefined ? this.mapSeed + 1 : Math.floor(Math.random() * 1e9);
+    this.spawnRandom = this.mulberry32(spawnSeed);
     this.terrain = new Terrain(
       this.canvas.width,
       this.canvas.height,
