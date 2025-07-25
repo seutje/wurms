@@ -20,11 +20,12 @@ describe('Projectile terrain wall behavior', () => {
     game.currentTurnProjectiles.push(projectile);
 
     vi.spyOn(game.terrain, 'isColliding').mockImplementation((x: number) => x >= 100);
+    vi.spyOn(game.terrain, 'getSlope').mockReturnValue(1e6);
 
     game.update();
 
-    expect(projectile.dx).toBe(-1);
-    expect(projectile.dy).toBe(0);
+    expect(projectile.dx).toBeCloseTo(-1, 3);
+    expect(projectile.dy).toBeCloseTo(0, 3);
     expect(game.projectiles.length).toBe(1);
   });
 });
