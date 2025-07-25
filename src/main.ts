@@ -3,10 +3,7 @@ import kontra from 'kontra/kontra.mjs';
 const { init, GameLoop } = kontra;
 import { Wurm } from './Wurm.js';
 import { Game } from './Game.js';
-import { DQNModel } from './ai/DQNModel.js';
-import { getObservation } from './ai/ObservationSpace.js';
-import { WEAPON_CHOICES } from './ai/ActionSpace.js';
-import { weaponProperties } from './WeaponProperties.js';
+
 import { SoundManager } from './SoundManager.js';
 import { setupKeyboardControls } from './KeyboardControls.js';
 
@@ -28,38 +25,37 @@ const playAgainButton = document.getElementById('play-again-button') as HTMLButt
 const seedParam = new URLSearchParams(window.location.search).get('seed');
 const urlSeed = seedParam ? parseInt(seedParam, 10) : undefined;
 
-function getAiAction(
-  shooter: Wurm,
-  target: Wurm,
-  model: DQNModel | null
-) {
-  let aiAngle: number;
-  let aiPower: number;
-  let aiWeapon: string;
+function getAiAction(shooter: Wurm, target: Wurm) {
+  const g = 0.1;
+  const power = 60;
+  const v = power * 0.15;
 
-  if (model) {
-    const observation = getObservation(target, shooter);
-    const prediction = model.predict(observation);
-    const argMax = prediction.argMax(-1);
-    const actionIndex = argMax.dataSync()[0];
-    argMax.dispose();
-    prediction.dispose();
+  const shooterX = shooter.x + shooter.width / 2;
+  const shooterY = shooter.y;
+  const targetX = target.x + target.width / 2;
+  const targetY = target.y;
 
-    const weaponIndex = Math.floor(actionIndex / (10 * 10));
-    const angleBin = Math.floor((actionIndex % 100) / 10);
-    const powerBin = actionIndex % 10;
+  const dx = targetX - shooterX;
+  const dy = shooterY - targetY;
 
-    aiWeapon = WEAPON_CHOICES[weaponIndex];
-    aiAngle = angleBin * 18;
-    aiPower = powerBin * 10;
+  let angleRad: number;
+  if (dx === 0) {
+    angleRad = Math.PI / 2;
   } else {
-    aiAngle = Math.random() * 180;
-    aiPower = Math.random() * 100;
-    const aiWeaponOptions = Object.keys(weaponProperties);
-    aiWeapon = aiWeaponOptions[Math.floor(Math.random() * aiWeaponOptions.length)];
+    const discriminant = v ** 4 - g * (g * dx ** 2 + 2 * dy * v ** 2);
+    if (discriminant <= 0) {
+      angleRad = Math.PI / 4;
+    } else {
+      angleRad = Math.atan((v ** 2 + Math.sqrt(discriminant)) / (g * dx));
+    }
   }
 
-  return { aiWeapon, aiAngle, aiPower };
+  let angleDeg = (angleRad * 180) / Math.PI;
+  if (dx < 0) {
+    angleDeg = 180 - angleDeg;
+  }
+
+  return { aiWeapon: 'mortar', aiAngle: angleDeg, aiPower: power };
 }
 
 
@@ -95,20 +91,7 @@ function startGame(seed?: number, playerIsAI = false, showUI = true) {
   const initialAngleInput = document.getElementById('angle') as HTMLInputElement;
   game.playerWurm.barrelAngle = 180 - parseFloat(initialAngleInput.value);
 
-  // AI Model
-  let aiModel: DQNModel | null = null;
-  
 
-  async function loadModel() {
-    try {
-      aiModel = await DQNModel.load('/models/dqn-model/model.json');
-      console.log('AI Model loaded successfully.');
-    } catch (error) {
-      console.warn('Could not load AI model, using random AI.', error);
-      // Fallback to random AI if model not found
-    }
-  }
-  loadModel();
 
   // UI Elements
   const weaponSelect = document.getElementById('weapon') as HTMLSelectElement;
@@ -172,8 +155,7 @@ function startGame(seed?: number, playerIsAI = false, showUI = true) {
           if (playerIsAI && whoseTurn === 'player') {
             const { aiWeapon, aiAngle, aiPower } = getAiAction(
               game.playerWurm,
-              game.aiWurm,
-              aiModel
+              game.aiWurm
             );
             game.fire(game.playerWurm, aiWeapon, aiAngle, aiPower);
             soundManager.playSound('fire');
@@ -210,8 +192,7 @@ function startGame(seed?: number, playerIsAI = false, showUI = true) {
         case GameState.RESOLUTION:
           const { aiWeapon, aiAngle, aiPower } = getAiAction(
             game.aiWurm,
-            game.playerWurm,
-            aiModel
+            game.playerWurm
           );
           game.fire(game.aiWurm, aiWeapon, aiAngle, aiPower);
           soundManager.playSound('fire');
@@ -270,7 +251,4 @@ playAgainButton.addEventListener('click', () => {
 });
 
 startGame(urlSeed, true, false);
-
-
-
 
