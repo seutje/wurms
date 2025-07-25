@@ -5,7 +5,7 @@ import { Game } from './Game.js';
 
 import { SoundManager } from './SoundManager.js';
 import { setupKeyboardControls } from './KeyboardControls.js';
-import { getAiAction } from './BallisticAI.js';
+import { getAiAction, resetAiShotCount } from './BallisticAI.js';
 
 // Sound Manager
 const soundManager = new SoundManager();
@@ -32,6 +32,7 @@ let mainGameLoop: any;
 function startGame(seed?: number, playerIsAI = false, showUI = true) {
   const canvas = document.getElementById('game') as HTMLCanvasElement;
   const context = canvas.getContext('2d') as CanvasRenderingContext2D;
+  resetAiShotCount();
 
   canvas.width = 800;
   canvas.height = 600;

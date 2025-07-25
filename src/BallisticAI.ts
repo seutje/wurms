@@ -1,5 +1,11 @@
 import { Wurm } from './Wurm.js';
 
+let shotCount = 0;
+
+export function resetAiShotCount() {
+  shotCount = 0;
+}
+
 export function getAiAction(shooter: Wurm, target: Wurm) {
   const g = 0.1;
   const power = 60;
@@ -31,5 +37,19 @@ export function getAiAction(shooter: Wurm, target: Wurm) {
     angleDeg = 180 - angleDeg;
   }
 
-  return { aiWeapon: 'mortar', aiAngle: angleDeg, aiPower: power };
+  shotCount += 1;
+
+  const missOffsets = [45, 20, 5];
+  if (shotCount <= missOffsets.length) {
+    const offset = missOffsets[shotCount - 1];
+    if (dx > 0) {
+      angleDeg = Math.max(0, angleDeg - offset);
+    } else {
+      angleDeg = Math.min(180, angleDeg + offset);
+    }
+  }
+
+  const aiWeapon = shotCount > 6 ? 'nuke' : 'mortar';
+
+  return { aiWeapon, aiAngle: angleDeg, aiPower: power };
 }
