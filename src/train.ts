@@ -2,6 +2,7 @@ import { JSDOM } from 'jsdom';
 import * as tf from '@tensorflow/tfjs-core';
 import '@tensorflow/tfjs-node'; // Use tfjs-node for headless environment
 import { promises as fs } from 'fs';
+import seedrandom from 'seedrandom';
 
 import { init } from './kontra.mock.js';
 import { Game } from './Game.js';
@@ -17,7 +18,8 @@ const dom = new JSDOM(`<!DOCTYPE html><body><canvas id="game"></canvas></body>`)
 (global as any).document = dom.window.document;
 (global as any).HTMLCanvasElement = dom.window.HTMLCanvasElement;
 (global as any).Image = dom.window.Image;
-const seed = 123;
+const seed = parseInt(process.argv[3] || '123');
+seedrandom(seed.toString(), { global: true });
 
 const canvas = dom.window.document.getElementById('game') as HTMLCanvasElement;
 canvas.width = 800;
@@ -50,7 +52,7 @@ const targetUpdateFreq = 5;
 
 // Training parameters
 const numEpisodes = parseInt(process.argv[2]) || 100;
-console.log(`Number of episodes: ${numEpisodes}`);
+console.log(`Number of episodes: ${numEpisodes}, Seed: ${seed}`);
 const epsilonDecay = 0.995;
 let epsilon = 1.0;
 const epsilonMin = 0.1;
