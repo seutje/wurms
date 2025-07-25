@@ -42,8 +42,10 @@ async function evaluate(numEpisodes = 1) {
     let episodeReward = 0;
     let prevDistance = Math.abs(aiWurm.x - playerWurm.x);
     let whoseTurn: 'player' | 'ai' = 'player';
+    let steps = 0;
+    const maxSteps = 200;
 
-    while (!done) {
+    while (!done && steps < maxSteps) {
       const prevAiHealth = aiWurm.health;
       const prevPlayerHealth = playerWurm.health;
 
@@ -95,6 +97,11 @@ async function evaluate(numEpisodes = 1) {
       } else {
         whoseTurn = whoseTurn === 'ai' ? 'player' : 'ai';
       }
+      steps++;
+    }
+
+    if (steps >= maxSteps) {
+      console.log(`Episode ${episode + 1}: reached max steps`);
     }
 
     console.log(`Episode ${episode + 1}: Reward = ${episodeReward}`);
