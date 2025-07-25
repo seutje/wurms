@@ -1,6 +1,7 @@
 import { JSDOM } from 'jsdom';
 import * as tf from '@tensorflow/tfjs-core';
 import '@tensorflow/tfjs-node';
+import seedrandom from 'seedrandom';
 
 import { init } from './kontra.mock.js';
 import { Game } from './Game.js';
@@ -14,7 +15,8 @@ const dom = new JSDOM(`<!DOCTYPE html><body><canvas id="game"></canvas></body>`)
 (global as any).document = dom.window.document;
 (global as any).HTMLCanvasElement = dom.window.HTMLCanvasElement;
 (global as any).Image = dom.window.Image;
-const seed = 123;
+const seed = parseInt(process.argv[3] || '123');
+seedrandom(seed.toString(), { global: true });
 
 const canvas = dom.window.document.getElementById('game') as HTMLCanvasElement;
 canvas.width = 800;
@@ -34,6 +36,7 @@ function getDummyPlayerShot() {
 async function evaluate(numEpisodes = 1) {
   const model = await DQNModel.load('file://./src/models/dqn-model/model.json');
   let totalReward = 0;
+  console.log(`Evaluating ${numEpisodes} episodes with seed: ${seed}`);
 
   for (let episode = 0; episode < numEpisodes; episode++) {
     game.reset();
