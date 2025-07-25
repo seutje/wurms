@@ -188,8 +188,16 @@ function startGame(seed?: number, playerIsAI = false, showUI = true) {
       // Display health (for debugging/testing)
       context.fillStyle = 'white';
       context.font = '16px Arial';
-      context.fillText(`Player Health: ${game.playerWurm.health}`, 10, 20);
-      context.fillText(`AI Health: ${game.aiWurm.health}`, canvas.width - 150, 20);
+      context.fillText(
+        `Player Health: ${Math.ceil(game.playerWurm.health)}`,
+        10,
+        20
+      );
+      context.fillText(
+        `AI Health: ${Math.ceil(game.aiWurm.health)}`,
+        canvas.width - 150,
+        20
+      );
     }
   } as any);
 
