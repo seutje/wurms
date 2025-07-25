@@ -185,7 +185,9 @@ async function train() {
       }
     }
 
-    epsilon = Math.max(epsilonMin, epsilon * epsilonDecay);
+    if (episode >= 50) {
+      epsilon = Math.max(epsilonMin, epsilon * epsilonDecay);
+    }
     const qRangeStr = isFinite(episodeQMin) && isFinite(episodeQMax)
       ? `${episodeQMin.toFixed(4)} to ${episodeQMax.toFixed(4)}`
       : 'N/A';
