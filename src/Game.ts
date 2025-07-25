@@ -270,8 +270,9 @@ export class Game {
           projectile.x = prevX;
           projectile.y = prevY;
           if (horizontalCollision && !verticalCollision) {
-            projectile.dx = -projectile.dx * 0.5;
-            projectile.dy *= 0.7;
+            // Slide down vertical slopes instead of bouncing
+            projectile.dx = 0;
+            projectile.dy += 1;
           } else if (verticalCollision && !horizontalCollision) {
             projectile.dy = -projectile.dy * 0.5;
             projectile.dx *= 0.7;

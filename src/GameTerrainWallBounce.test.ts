@@ -8,7 +8,7 @@ vi.mock('kontra/kontra.mjs', async () => {
 });
 
 describe('Projectile terrain wall behavior', () => {
-  it('bounces off a vertical terrain wall', () => {
+  it('rolls down a vertical terrain wall', () => {
     const canvas = document.createElement('canvas');
     canvas.width = 800;
     canvas.height = 600;
@@ -23,8 +23,8 @@ describe('Projectile terrain wall behavior', () => {
 
     game.update();
 
-    expect(projectile.dx).toBe(-1);
-    expect(projectile.dy).toBe(0);
+    expect(projectile.dx).toBe(0);
+    expect(projectile.dy).toBe(1);
     expect(game.projectiles.length).toBe(1);
   });
 });
