@@ -59,6 +59,7 @@ async function train() {
   for (let episode = 0; episode < numEpisodes; episode++) {
     // Reset game state for new episode
     game.reset();
+    game.randomizeSpawnPositions();
 
     let done = false;
     let totalReward = 0;

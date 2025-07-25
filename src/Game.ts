@@ -32,6 +32,20 @@ export class Game {
     return [playerX, aiX] as const;
   }
 
+  public randomizeSpawnPositions() {
+    const [playerX, aiX] = this.getSpawnPositions();
+    this.playerWurm.x = playerX;
+    this.playerWurm.y =
+      this.terrain.getGroundHeight(playerX) -
+      this.spawnOffset -
+      this.playerWurm.height;
+    this.aiWurm.x = aiX;
+    this.aiWurm.y =
+      this.terrain.getGroundHeight(aiX) -
+      this.spawnOffset -
+      this.aiWurm.height;
+  }
+
   private circleIntersectsRect(
     cx: number,
     cy: number,
@@ -115,14 +129,8 @@ export class Game {
       this.context,
       this.mapSeed
     );
-    const [playerX, aiX] = this.getSpawnPositions();
-    this.playerWurm.x = playerX;
-    this.playerWurm.y =
-      this.terrain.getGroundHeight(playerX) - this.spawnOffset - this.playerWurm.height;
+    this.randomizeSpawnPositions();
     this.playerWurm.health = 100;
-    this.aiWurm.x = aiX;
-    this.aiWurm.y =
-      this.terrain.getGroundHeight(aiX) - this.spawnOffset - this.aiWurm.height;
     this.aiWurm.health = 100;
     this.projectiles = [];
     this.currentTurnProjectiles = [];
