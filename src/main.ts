@@ -35,7 +35,7 @@ function getAiAction(
   let aiWeapon: string;
 
   if (model) {
-    const observation = getObservation(shooter, target);
+    const observation = getObservation(target, shooter);
     const prediction = model.predict(observation);
     const argMax = prediction.argMax(-1);
     const actionIndex = argMax.dataSync()[0];

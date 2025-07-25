@@ -41,7 +41,7 @@ async function evaluate(numEpisodes = 1) {
     let prevDistance = Math.abs(aiWurm.x - playerWurm.x);
 
     while (!done) {
-      const observation = getObservation(aiWurm, playerWurm);
+      const observation = getObservation(playerWurm, aiWurm);
       const qValues = model.predict(observation) as tf.Tensor;
       const argMax = tf.argMax(qValues);
       const actionIndex = argMax.dataSync()[0];
