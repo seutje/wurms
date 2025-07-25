@@ -22,8 +22,23 @@ export class Wurm extends Sprite {
   }
 
   public draw = () => {
+    // body with outline
     this.context.fillStyle = this.color;
-    this.context.fillRect(this.x, this.y, this.width, this.height);
+    this.context.strokeStyle = 'black';
+    this.context.lineWidth = 2;
+    this.context.beginPath();
+    this.context.rect(this.x, this.y, this.width, this.height);
+    this.context.fill();
+    this.context.stroke();
+
+    // head at the bottom of the body
+    const headRadius = this.height / 2;
+    const headX = this.x + this.width / 2;
+    const headY = this.y + this.height + headRadius;
+    this.context.beginPath();
+    this.context.arc(headX, headY, headRadius, 0, Math.PI * 2);
+    this.context.fill();
+    this.context.stroke();
 
     // barrel showing current angle
     const centerX = this.x + this.width / 2;
