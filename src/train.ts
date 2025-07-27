@@ -60,6 +60,7 @@ async function train() {
   for (let episode = 0; episode < numEpisodes; episode++) {
     // Reset game state for new episode
     game.reset();
+    game.randomizeSpawnPositions();
 
     const maxSteps = 200;
 
